@@ -1,4 +1,8 @@
+import os
+
+from dotenv import load_dotenv
 from flask import Flask
+
 from routes import api
 
 
@@ -21,4 +25,9 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    load_dotenv()
+
+    port = int(os.getenv("PORT", 5000))
+    api_key = os.getenv("API_KEY")
+
+    app.run(host="0.0.0.0", port=port, debug=True)
