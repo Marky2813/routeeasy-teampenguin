@@ -15,6 +15,7 @@ import {
 import { Button, buttonVariants } from '@/components/ui/button'
 import { useDropzone } from "react-dropzone"
 import * as XLSX from "xlsx"
+import Map from './Map'
 
 function App() {
   const [submitted, setSubmitted] = useState(false);
@@ -49,7 +50,7 @@ function App() {
 
   const downloadSampleXLSX = () => {
     const worksheet = XLSX.utils.json_to_sheet([], {
-      header: ["Order ID", "Customer Name", "Phone Number", "Delivery Address", "Pincode", "Package Weight(kg)"]
+      header: ["orderId", "customerName", "phoneNumber", "deliveryAddress", "pincode", "packageWeight(kg)"]
     })
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
@@ -61,8 +62,10 @@ function App() {
       <TooltipProvider>
         <SidebarProvider>
           <AppSidebar />
-          <main className='w-full'>
+          <main className='max-h-dvh overflow-hidden w-full'>
             <h1 className='text-3xl font-semibold mt-4 ml-10'>Dashboard</h1>
+          <div className='flex h-full gap-5'>  
+            <div className='flex flex-col h-full'>
             <div className='flex mt-3 ml-10 items-center gap-5'>
               <Card className="w-60 h-auto h-fit">
                 <CardHeader>
@@ -133,6 +136,12 @@ function App() {
                 </CardContent>
               </Card>
             </div>
+            <div className='text-4xl mt-3 ml-10 bg-blue-700 grow mb-17'>Table</div>
+            </div>
+            <div className='mt-3 mb-17 flex-1 mr-10 rounded-2xl bg-black'>
+            <Map />
+            </div>
+          </div>
           </main>
         </SidebarProvider>
       </TooltipProvider>

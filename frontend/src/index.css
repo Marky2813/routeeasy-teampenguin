@@ -191,3 +191,7 @@ code {
     @apply bg-background text-foreground;}
   html {
     @apply font-sans;}}
+
+.leaflet-control-attribution {
+  display: none;
+}
