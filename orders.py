@@ -24,6 +24,7 @@ class Order:
     status: OrderStatus
     arrival: datetime
 
+
 class Orders:
     def __init__(self):
         self.items: list[Order] = []
