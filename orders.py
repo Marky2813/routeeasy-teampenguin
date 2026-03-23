@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+
 from parser import Coordinates
 
 
@@ -7,19 +8,23 @@ class OrderStatus(str, Enum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 class Order:
     order_id: int
+    customer_name: str
+    package_weight: int
+    phone_number: str
+    delivery_address: str
+    pincode: int
+
     handshake_duration: int
-    # name: str
-    load: int
-    contact: int
-    text_address: str
     location: Coordinates
     status: OrderStatus
     arrival: datetime
 
 
 class Orders:
-    items: list[Order]
+    def __init__(self):
+        self.items: list[Order] = []
