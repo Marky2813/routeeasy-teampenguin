@@ -24,7 +24,6 @@ class Order:
     status: OrderStatus
     arrival: datetime
 
-print(Order.FAILED)
 class Orders:
     def __init__(self):
         self.items: list[Order] = []
