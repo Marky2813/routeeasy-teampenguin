@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from parser import Coordinates
+from vrp_api import Coordinates
 
 
 class OrderStatus(str, Enum):
@@ -24,7 +24,7 @@ class Order:
     status: OrderStatus
     arrival: datetime
 
-
+print(Order.FAILED)
 class Orders:
     def __init__(self):
         self.items: list[Order] = []
