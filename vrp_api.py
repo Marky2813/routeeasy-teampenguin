@@ -1,6 +1,11 @@
+import time
 from datetime import datetime
 
+import requests
 from pydantic import BaseModel, Field
+
+import state
+from orders import generate_solvice_payload
 
 # ==========================================
 # 1. SHARED MODELS
@@ -109,8 +114,63 @@ json_payload = """
 """
 
 
-parsed_data = VrpResponsePayload.model_validate_json(json_payload)
+# parsed_data = VrpResponsePayload.model_validate_json(json_payload)
+#
+# print(f"First van: {parsed_data.solution.routes[0].resource}")
+# print(f"Total jobs for van_2: {parsed_data.solution.routes[1].summary.total_jobs}")
+# print(f"Arrival time of first job: {parsed_data.solution.routes[0].jobs[0].arrival}")
 
-print(f"First van: {parsed_data.solution.routes[0].resource}")
-print(f"Total jobs for van_2: {parsed_data.solution.routes[1].summary.total_jobs}")
-print(f"Arrival time of first job: {parsed_data.solution.routes[0].jobs[0].arrival}")
+
+def solve_vrp() -> VrpResponsePayload | None:
+    SOLVICE_SOLVE_URL = "https://api.solvice.io/v2/vrp/solve"
+    SOLVICE_URL = "https://api.solvice.io/v2/vrp/jobs/"
+
+    payload = generate_solvice_payload(state.orders, [])
+    get_req_headers = {"Authorization": state.api_key}
+    post_req_headers = {
+        "Authorization": state.api_key,
+        "Content-Type": "application/json",
+    }
+
+    parsed_data = None
+    try:
+        res = requests.post(SOLVICE_SOLVE_URL, json=payload, headers=post_req_headers)
+        res.raise_for_status()
+
+        solvice_id = res.json().get("id")
+        solvice_status_url = SOLVICE_URL + solvice_id + "/status"
+        solvice_solution_url = SOLVICE_URL + solvice_id + "/solution"
+
+        max_attempt = 100
+        attempt = 0
+        while attempt < max_attempt:
+            res = requests.get(solvice_status_url, headers=get_req_headers)
+            res.raise_for_status()
+
+            status = res.json().get("status")
+            if status == "SOLVED":
+                break
+            elif status in ("FAILED", "ERROR", "CANCELLED"):
+                print(f"Solver failed with status: {status}")
+                return
+
+            time.sleep(1)
+            attempt += 1
+        else:
+            print("Timeout waiting for solution")
+            return
+
+        res = requests.get(solvice_solution_url, headers=get_req_headers)
+        res.raise_for_status()
+        parsed_data = VrpResponsePayload.model_validate_json(res.text)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+        return
+
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return
+
+    print(f"Solvice Response: {parsed_data}")
+    return parsed_data
