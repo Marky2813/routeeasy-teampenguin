@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-
+import { useSidebar } from "@/components/ui/sidebar"
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
@@ -13,7 +13,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { GalleryVerticalEndIcon, AudioLinesIcon, TerminalIcon, TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, FrameIcon, PieChartIcon, MapIcon } from "lucide-react"
+import { GalleryVerticalEndIcon, LayoutDashboard, MapPinned, TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, FrameIcon, PieChartIcon, MapIcon } from "lucide-react"
+let name; 
 
 // This is sample data.
 const data = {
@@ -24,7 +25,7 @@ const data = {
   },
   teams: [
     {
-      name: "RouteEasy",
+      
       logo: (
         <GalleryVerticalEndIcon />
       ),
@@ -37,42 +38,17 @@ const data = {
       title: "Dashboard",
       url: "#",
       icon: (
-        <TerminalSquareIcon />
+        <LayoutDashboard />
       ),
-      isActive: false,
+      isActive: true,
     },
     {
-      title: "Live Map",
+      title: "Live Map (coming soon)",
       url: "#",
       icon: (
-        <BookOpenIcon />
+        <MapPinned />
       ),
 
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon />
-      ),
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
     },
   ],
   projects: [
@@ -103,10 +79,14 @@ const data = {
 export function AppSidebar({
   ...props
 }) {
+  const { state } = useSidebar(); 
+  (state === "collapsed") ? "RE" : "RouteEasy";
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        
+          {state === "collapsed" ? <h1 className='text-2xl font-bold ml-0.5'>RE</h1>:<h1 className='text-3xl font-bold'>RouteEasy</h1>}
+        
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

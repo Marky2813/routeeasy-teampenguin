@@ -4,13 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import './App.css'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardAction,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card"
 import { Button, buttonVariants } from '@/components/ui/button'
 import { useDropzone } from "react-dropzone"
@@ -862,103 +862,103 @@ const dummyData = [
 ]
 
 function App() {
-  const [submitted, setSubmitted] = useState(false);
-  const [file, setFile] = useState(null);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: {
-      "text/csv": [".csv"],
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-      "application/vnd.ms-excel": [".xls"]
-    },
-    multiple: false,
-    onDrop: (acceptedFiles) => {
-      setSubmitted(true);
-      setFile(acceptedFiles[0]);
-      // here we will also make the accepted state to show file and submit 
-    }
-  })
-
-  function handleSubmit() {
-    const reader = new FileReader();
-    //filereader is a browser api which reads file asynchronously. so we define what needs to be done when the reader is done reading, the browser will call this onload automatically. 
-    reader.onload = (e) => {
-      const workbook = XLSX.read(e.target.result, { type: "array" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(firstSheet);
-      console.log(data);
-      //data[i] refers to an object and uss object ka deliveryAddress and pincode use karke we will be sending the geocoding request. 
-      // let arr = Promise.all(data.map(async (e) => {
-      //   let address = e.deliveryAddress.split(" ").join("+") + `,${e.pincode}`;
-      //   const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`);
-      //   const coordinates = [response.data.results[0].geometry.location.lat, response.data.results[0].geometry.location.lng];
-      //   e.coordinates = coordinates;  
-      //   return e;
-      // }))
-      // arr.then((val) => console.log(val))
-    };
-
-    reader.readAsArrayBuffer(file);
-    setSubmitted(false)
-  }
-
-  const downloadSampleXLSX = () => {
-    const worksheet = XLSX.utils.json_to_sheet([], {
-      header: ["orderId", "customerName", "phoneNumber", "deliveryAddress", "pincode", "packageWeight(kg)"]
+    const [submitted, setSubmitted] = useState(false);
+    const [file, setFile] = useState(null);
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        accept: {
+            "text/csv": [".csv"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+            "application/vnd.ms-excel": [".xls"]
+        },
+        multiple: false,
+        onDrop: (acceptedFiles) => {
+            setSubmitted(true);
+            setFile(acceptedFiles[0]);
+            // here we will also make the accepted state to show file and submit 
+        }
     })
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "sample.xlsx");
-  }
 
-  return (
-    <>
-      <TooltipProvider>
-        <SidebarProvider>
-          <AppSidebar />
-          <main className='max-h-dvh overflow-hidden w-full'>
-            <h1 className='text-3xl font-semibold mt-4 ml-10'>Dashboard</h1>
-          <div className='flex h-full gap-5'>  
-            <div className='flex flex-col h-full'>
-            <div className='flex mt-3 ml-10 items-center gap-5'>
-              <Card className="w-60 h-auto h-fit">
-                <CardHeader>
-                  <CardTitle className="text-xl underline decoration-dotted decoration-gray-400 decoration-2 underline-offset-3">Orders</CardTitle>
-                  <CardAction></CardAction>
-                </CardHeader>
-                <CardContent className="text-xl -mt-3 font-semibold">
-                  <p>70</p>
-                </CardContent>
-              </Card>
-              <Card className="w-60 h-auto h-fit">
-                <CardHeader>
-                  <CardTitle className="text-xl underline decoration-dotted decoration-gray-400 decoration-2 underline-offset-3">Failed Deliveries</CardTitle>
-                  <CardAction></CardAction>
-                </CardHeader>
-                <CardContent className="text-xl -mt-3 font-semibold">
-                  <p>5</p>
-                </CardContent>
-              </Card>
-              <Card className="w-60 h-auto h-fit">
-                <CardHeader>
-                  <CardTitle className=" text-xl underline decoration-dotted decoration-gray-400 decoration-2 underline-offset-3">Active Fleet</CardTitle>
-                  <CardAction></CardAction>
-                </CardHeader>
-                <CardContent className="text-xl -mt-3 font-semibold">
-                  <p>3</p>
-                </CardContent>
-              </Card>
-            </div>
-            <div className='mt-3 ml-10'>
-              <Card className="w-190 h-auto h-fit">
-                <CardHeader>
-                  <CardTitle className=" text-xl underline decoration-dotted decoration-gray-400 decorati  on-2 underline-offset-3">Order Entry</CardTitle>
-                  <CardAction >
-                    <Button variant='link' className="text-blue-600 decoration-solid underline" size='sm' onClick={downloadSampleXLSX}>Sample File</Button>
-                  </CardAction>
-                </CardHeader>
-                <CardContent className="text-xl -mt-3 font-semibold">
-                  {!submitted && <div className='items-center flex gap-1 justify-center flex-col mt-5 mb-3'>
-                    {/* <input 
+    function handleSubmit() {
+        const reader = new FileReader();
+        //filereader is a browser api which reads file asynchronously. so we define what needs to be done when the reader is done reading, the browser will call this onload automatically. 
+        reader.onload = (e) => {
+            const workbook = XLSX.read(e.target.result, { type: "array" });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const data = XLSX.utils.sheet_to_json(firstSheet);
+            console.log(data);
+            //data[i] refers to an object and uss object ka deliveryAddress and pincode use karke we will be sending the geocoding request. 
+            // let arr = Promise.all(data.map(async (e) => {
+            //   let address = e.deliveryAddress.split(" ").join("+") + `,${e.pincode}`;
+            //   const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`);
+            //   const coordinates = [response.data.results[0].geometry.location.lat, response.data.results[0].geometry.location.lng];
+            //   e.coordinates = coordinates;  
+            //   return e;
+            // }))
+            // arr.then((val) => console.log(val))
+        };
+
+        reader.readAsArrayBuffer(file);
+        setSubmitted(false)
+    }
+
+    const downloadSampleXLSX = () => {
+        const worksheet = XLSX.utils.json_to_sheet([], {
+            header: ["orderId", "customerName", "phoneNumber", "deliveryAddress", "pincode", "packageWeight(kg)"]
+        })
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        XLSX.writeFile(workbook, "sample.xlsx");
+    }
+
+    return (
+        <>
+            <TooltipProvider>
+                <SidebarProvider>
+                    <AppSidebar />
+                    <main className='max-h-dvh overflow-hidden w-full'>
+                        <h1 className='text-3xl font-semibold mt-4 ml-10'>Dashboard</h1>
+                        <div className='flex h-full gap-5'>
+                            <div className='flex flex-col h-full flex-1 min-w-90'>
+                                <div className='flex mt-3 ml-10 items-center gap-5'>
+                                    <Card className="min-w-30 flex-1 h-auto h-fit">
+                                        <CardHeader>
+                                            <CardTitle className="xl:text-xl text-md underline decoration-dotted decoration-gray-400 decoration-2 underline-offset-3">Orders</CardTitle>
+                                            <CardAction></CardAction>
+                                        </CardHeader>
+                                        <CardContent className="xl:text-xl text-md -mt-3 font-semibold">
+                                            <p>70</p>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="min-w-30 flex-1 h-auto h-fit">
+                                        <CardHeader>
+                                            <CardTitle className="xl:text-xl text-md underline decoration-dotted decoration-gray-400 decoration-2 underline-offset-3">Failed Deliveries</CardTitle>
+                                            <CardAction></CardAction>
+                                        </CardHeader>
+                                        <CardContent className="xl:text-xl text-md -mt-3 font-semibold">
+                                            <p>5</p>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="min-w-30 flex-1 h-auto h-fit">
+                                        <CardHeader>
+                                            <CardTitle className=" xl:text-xl text-md underline decoration-dotted decoration-gray-400 decoration-2 underline-offset-3">Active Fleet</CardTitle>
+                                            <CardAction></CardAction>
+                                        </CardHeader>
+                                        <CardContent className="xl:text-xl text-md -mt-3 font-semibold">
+                                            <p>3</p>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                                <div className='mt-3 ml-10'>
+                                    <Card className="min-w-90 h-auto h-fit">
+                                        <CardHeader>
+                                            <CardTitle className=" text-xl underline decoration-dotted decoration-gray-400 decorati  on-2 underline-offset-3">Order Entry</CardTitle>
+                                            <CardAction >
+                                                <Button variant='link' className="text-blue-600 decoration-solid underline" size='sm' onClick={downloadSampleXLSX}>Sample File</Button>
+                                            </CardAction>
+                                        </CardHeader>
+                                        <CardContent className="text-xl -mt-3 font-semibold">
+                                            {!submitted && <div className='items-center flex gap-1 justify-center flex-col mt-5 mb-3'>
+                                                {/* <input 
                   type='file'
                   accept='.csv'
                   onChange={onFileChange}
@@ -966,43 +966,43 @@ function App() {
                   className='hidden'></input>
                   <Button variant="outline" size="lg" onClick={() => inputRef.current.click()}>Upload CSV</Button>
                   {file && <span className='text-sm text-muted-foreground'>{file.name}</span>} */}
-                    <div {...getRootProps()}
-                      className='border-1 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors 
+                                                <div {...getRootProps()}
+                                                    className='border-1 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors 
           ${isDragActive ? "border-primary bg-primary/10" : "border-muted-foreground/30"}'>
-                      <input {...getInputProps()} />
-                      <p className="text-muted-foreground text-sm">Drag & drop a CSV here, or click to browse</p>
-                    </div>
-                  </div>}
-                  {submitted &&
-                    <div className='flex flex-col items-center justify-center mt-5 mb-3'>
-                      <span className='text-sm text-muted-foreground mb-2'>{file.name}</span>
-                      <div className='flex gap-3'>
-                        <Button onClick={handleSubmit} size='sm'>Submit</Button>
-                        <Button variant='destructive' size='sm' onClick={() => {
-                          setSubmitted(false);
-                        }}>Clear</Button>
-                      </div>
+                                                    <input {...getInputProps()} />
+                                                    <p className="text-muted-foreground text-sm">Drag & drop a CSV here, or click to browse</p>
+                                                </div>
+                                            </div>}
+                                            {submitted &&
+                                                <div className='flex flex-col items-center justify-center mt-5 mb-3'>
+                                                    <span className='text-sm text-muted-foreground mb-2'>{file.name}</span>
+                                                    <div className='flex gap-3'>
+                                                        <Button onClick={handleSubmit} size='sm'>Submit</Button>
+                                                        <Button variant='destructive' size='sm' onClick={() => {
+                                                            setSubmitted(false);
+                                                        }}>Clear</Button>
+                                                    </div>
 
-                    </div>
+                                                </div>
 
-                  }
-                </CardContent>
-              </Card>
-            </div>
-            {/* <div className='text-4xl mt-3 ml-10 bg-blue-700 grow mb-17'>Table</div> */}
-            <div className='flex-1 mb-17 overflow-y-auto rounded-md mt-3 rounded-md  ml-10  border-none ring-1 ring-foreground/10 hover:cursor-pointer'>
-            <OrdersTable />
-            </div>
-            </div>
-            <div className='mt-3 mb-17 flex-1 mr-10 rounded-2xl bg-black'>
-            <Map dummyData={dummyData}/>
-            </div>
-          </div>
-          </main>
-        </SidebarProvider>
-      </TooltipProvider>
-    </>
-  )
+                                            }
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                                {/* <div className='text-4xl mt-3 ml-10 bg-blue-700 grow mb-17'>Table</div> */}
+                                <div className='flex-1 mb-17 overflow-y-auto rounded-md mt-3 rounded-md  ml-10  border-none ring-1 ring-foreground/10 hover:cursor-pointer min-w-90'>
+                                    <OrdersTable />
+                                </div>
+                            </div>
+                            <div className='mt-3 mb-17 flex-1 mr-10 rounded-2xl bg-black min-w-0'>
+                                <Map dummyData={dummyData} />
+                            </div>
+                        </div>
+                    </main>
+                </SidebarProvider>
+            </TooltipProvider>
+        </>
+    )
 }
 
 export default App
