@@ -16,6 +16,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { useDropzone } from "react-dropzone"
 import * as XLSX from "xlsx"
 import Map from './Map'
+import OrdersTable from './OrdersTable'
 
 function App() {
   const [submitted, setSubmitted] = useState(false);
@@ -136,7 +137,10 @@ function App() {
                 </CardContent>
               </Card>
             </div>
-            <div className='text-4xl mt-3 ml-10 bg-blue-700 grow mb-17'>Table</div>
+            {/* <div className='text-4xl mt-3 ml-10 bg-blue-700 grow mb-17'>Table</div> */}
+            <div className='flex-1 mb-17 overflow-y-auto rounded-md mt-3 rounded-md  ml-10  border-none ring-1 ring-foreground/10 hover:cursor-pointer'>
+            <OrdersTable />
+            </div>
             </div>
             <div className='mt-3 mb-17 flex-1 mr-10 rounded-2xl bg-black'>
             <Map />

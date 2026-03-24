@@ -5,6 +5,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+/* width */
+::-webkit-scrollbar {
+  width: 0px;
+
+}
+
+
+
+
 :root {
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -195,3 +205,4 @@ code {
 .leaflet-control-attribution {
   display: none;
 }
+
