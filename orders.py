@@ -66,8 +66,8 @@ def generate_solvice_payload(orders: Orders, resources: list) -> dict:
                 {
                     "from": "2024-03-15T08:00:00Z",
                     "to": "2024-03-15T18:00:00Z",
-                    "start": {"latitude": 52.52, "longitude": 13.405},
-                    "end": {"latitude": 52.52, "longitude": 13.405},
+                    "start": {"latitude": 28.616856, "longitude": 77.29401},
+                    "end": {"latitude": 28.616856, "longitude": 77.29401},
                 }
             ],
             "capacity": [50],
