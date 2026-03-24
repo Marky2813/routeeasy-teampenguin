@@ -995,7 +995,7 @@ function App() {
             </div>
             </div>
             <div className='mt-3 mb-17 flex-1 mr-10 rounded-2xl bg-black'>
-            <Map />
+            <Map dummyData={dummyData}/>
             </div>
           </div>
           </main>
