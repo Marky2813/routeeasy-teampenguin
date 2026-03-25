@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 import state
 from routes import api
@@ -20,6 +21,7 @@ def create_app():
 
 
 app = create_app()
+CORS(app)
 
 
 if __name__ == "__main__":
