@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 
 import state
+import announcer
 from routes import api
 
 
