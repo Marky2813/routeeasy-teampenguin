@@ -11,6 +11,10 @@ api_key = os.getenv("API_KEY")
 orders = Orders()
 
 # For testing purposes
-orders.items.append(
-    Order("01", "Shaurya", 112, "+918368458315", "A-167 sector-122", 201031)
-)
+# TEMPORARY ORDERS. In production, will added via POST req to /orders endpoint.
+orders.items = [
+    Order("001", "Shaurya Singh", 1.2, "918368458315", "A-167 SEC-122", 201301, Coordinates(1.2, 4.5),
+          datetime(2026, 3, 26, 3, 30)),
+    Order("002", "Sarthak", 1.5, "919871740518", "DELHI ME KAHI", 110067, Coordinates(1.5, 2.3),
+          datetime(2026, 3, 26, 3, 30))
+]
