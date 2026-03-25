@@ -2,9 +2,10 @@ from twilio.rest import Client
 from state import orders
 from orders import OrderStatus
 from datetime import datetime, timedelta
-ACCOUNT_SID = "ACc8718f4c1a01127499ba7e16ac719fd2"
-AUTH_TOKEN = "cd01bffd333edd93878774d615570a4a"
-client = Client(ACCOUNT_SID, AUTH_TOKEN)
+client = Client(
+    os.getenv("TWILIO_ACCOUNT_SID"),
+    os.getenv("TWILIO_AUTH_TOKEN")
+)
 
 
 # datetime(2026, 3, 25, 3, 30)
