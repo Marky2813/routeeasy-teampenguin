@@ -71,7 +71,7 @@ def webhook():
     if data.get("message").lower() == "na":
         # GET req. to: https://api.textmebot.com/send.php?recipient=[+91xxxxxxxxxx]&apikey=[TMB_API_KEY]&text=[TEXT]
         tmb_api_key = os.getenv("TMB_API_KEY")
-        text = f"Your request to reschedule the delivery for order ID {order.order_id} has been received and forwarded to the delivery team. Please note: if this request is made less than 4 hours before the expected arrival time, the driver may still attempt delivery today. Thank you for your understanding."
+        text = f"Your request to reschedule the delivery for order ID {order.order_id} has been received and forwarded to the delivery team. \n\nPlease note: if this request is made less than 4 hours before the expected arrival time, the driver may still attempt delivery today. \n\nThank you for your understanding."
         print(
             requests.get(
                 url="https://api.textmebot.com/send.php",
@@ -82,6 +82,7 @@ def webhook():
                 },
             )
         )
+        return {"message": "Message Sent."}
     return {"message": "Message Ignored."}
 
 
