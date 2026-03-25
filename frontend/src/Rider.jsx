@@ -1,11 +1,13 @@
 import { Button } from "./components/ui/button";
+import { useZus } from "./store";
 
 function Rider() {
+  const stops = useZus((state) => state.ordersCount)
  return(
   <>
   <div className="mt-3 ml-2">
    <p className="text-sm font-semibold">RouteEasy • Ravi Bhai</p>
-  <h1 className="text-lg font-bold">23 Stops Today</h1>
+  <h1 className="text-lg font-bold">{stops} Stops Today</h1>
   <p className="text-sm font-semibold">Optimised route • 50km total</p>
   </div>
   <div className="mt-3"> 
