@@ -25,8 +25,8 @@ class Order:
     phone_number: str
     delivery_address: str
     pincode: int
+    coordinates: Coordinates
     handshake_duration: Optional[int] = 300
-    coordinates: Optional[Coordinates] = None
     status: Optional[OrderStatus] = OrderStatus.PENDING
     arrival: Optional[datetime] = None
 

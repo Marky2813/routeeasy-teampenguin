@@ -40,7 +40,7 @@ class VrpResponsePayload(BaseModel):
         populate_by_name = True
 
 
-def solve_vrp() -> VrpResponsePayload | None:
+def solve_vrp() -> list | None:
     SOLVICE_SOLVE_URL = "https://api.solvice.io/v2/vrp/solve"
     SOLVICE_URL = "https://api.solvice.io/v2/vrp/jobs/"
 
@@ -52,7 +52,7 @@ def solve_vrp() -> VrpResponsePayload | None:
         "Content-Type": "application/json",
     }
 
-    parsed_data = None
+    optimal_route = None
     try:
         res = requests.post(SOLVICE_SOLVE_URL, json=payload, headers=post_req_headers)
         res.raise_for_status()
@@ -82,7 +82,7 @@ def solve_vrp() -> VrpResponsePayload | None:
 
         res = requests.get(solvice_solution_url, headers=get_req_headers)
         res.raise_for_status()
-        parsed_data = VrpResponsePayload.model_validate_json(res.text)
+        optimal_route = VrpResponsePayload.model_validate_json(res.text)
 
     except requests.exceptions.RequestException as e:
         print(f"Request error: {e}")
@@ -92,4 +92,11 @@ def solve_vrp() -> VrpResponsePayload | None:
         print(f"Unexpected error: {e}")
         return
 
-    return parsed_data
+    slots = []
+    for visit in optimal_route.trips[0].visits:
+        slots.append({visit.job: visit.arrival})
+        for order in state.orders.items:
+            if order.order_id == visit.job:
+                order.arrival = visit.arrival
+
+    return slots

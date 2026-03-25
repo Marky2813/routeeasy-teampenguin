@@ -1,10 +1,12 @@
-from flask import Blueprint, jsonify, request
 import os
+
+import requests
 from dotenv import load_dotenv
+from flask import Blueprint, jsonify, request
+
 import state
 from orders import Coordinates, Order, OrderStatus
 from vrp_api import solve_vrp
-import requests
 
 api = Blueprint("api", __name__)
 
@@ -25,6 +27,10 @@ def retrive_post():
 
     for order in orders:
         try:
+            coo = Coordinates(
+                latitude=order.get("coordinates")[0],
+                longitude=order.get("coordinates")[1],
+            )
             new_order = Order(
                 order_id=order.get("orderId"),
                 customer_name=order.get("customerName", "Unknown"),
@@ -32,17 +38,18 @@ def retrive_post():
                 phone_number=order.get("phoneNumber"),
                 delivery_address=order.get("deliveryAddress"),
                 pincode=order.get("pincode"),
-            )
-            new_order.coordinates = Coordinates(
-                latitude=order.get("coordinates")[0],
-                longitude=order.get("coordinates")[1],
+                coordinates=coo,
             )
         except ValueError as e:
             return jsonify({"error": "Validation failed", "details": str(e)}), 422
 
         state.orders.items.append(new_order)
 
-    return {"message": "orders received"}, 201
+    slots = solve_vrp()
+    if slots is None:
+        return {"message": "internal server error"}, 500
+    else:
+        return slots, 201
 
 
 @api.get("/test_route")
@@ -51,7 +58,7 @@ def test_route():
     if data is None:
         return {"message": "fucked"}, 401
     else:
-        return data.model_dump()
+        return data
 
 
 @api.post("/webhook")
