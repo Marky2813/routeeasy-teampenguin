@@ -4,22 +4,6 @@ from state import orders
 from orders import Coordinates, Order, OrderStatus
 app = Flask(__name__)
 
-'''
-@app.route(...)
-this is called Route = URL path where your server listens
-
-
-http://your-server/webhook
-Twilio will send data to this URL
-
-What is request?
-Represents the incoming HTTP request
-Contains all data sent by Twilio
-'''
-@app.route("/")
-@app.route("/")
-def home():
-    return "Home works"
 
 @app.route("/webhook", methods=["POST"])
 def whatsapp_webhook():
