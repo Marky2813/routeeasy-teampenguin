@@ -18,6 +18,11 @@ import * as XLSX from "xlsx"
 import Map from './Map'
 import OrdersTable from './OrdersTable'
 import axios from "axios"
+import  {EventSource } from "eventsource";
+import SSEListener from './SSEListenere'
+
+
+
 const dummyData = [
     {
         "orderId": "RE-10001",
@@ -878,6 +883,7 @@ function App() {
         }
     })
 
+
     function handleSubmit() {
         const reader = new FileReader();
         //filereader is a browser api which reads file asynchronously. so we define what needs to be done when the reader is done reading, the browser will call this onload automatically. 
@@ -886,6 +892,8 @@ function App() {
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const data = XLSX.utils.sheet_to_json(firstSheet);
             console.log(data);
+            const result = axios.post('http://localhost:5000/api/orders', dummyData)
+            result.then((res) => console.log(res));
             //data[i] refers to an object and uss object ka deliveryAddress and pincode use karke we will be sending the geocoding request. 
             // let arr = Promise.all(data.map(async (e) => {
             //   let address = e.deliveryAddress.split(" ").join("+") + `,${e.pincode}`;
@@ -912,12 +920,13 @@ function App() {
 
     return (
         <>
+            <SSEListener />
             <TooltipProvider>
                 <SidebarProvider>
                     <AppSidebar />
-                    <main className='max-h-dvh overflow-hidden w-full'>
+                    <main className='lg:max-h-dvh lg:overflow-hidden w-full'>
                         <h1 className='text-3xl font-semibold mt-4 ml-10'>Dashboard</h1>
-                        <div className='flex h-full gap-5'>
+                        <div className='flex h-full gap-5 flex-col lg:flex-row'>
                             <div className='flex flex-col h-full flex-1 min-w-90'>
                                 <div className='flex mt-3 ml-10 items-center gap-5'>
                                     <Card className="min-w-30 flex-1 h-auto h-fit">
@@ -990,11 +999,11 @@ function App() {
                                     </Card>
                                 </div>
                                 {/* <div className='text-4xl mt-3 ml-10 bg-blue-700 grow mb-17'>Table</div> */}
-                                <div className='flex-1 mb-17 overflow-y-auto rounded-md mt-3 rounded-md  ml-10  border-none ring-1 ring-foreground/10 hover:cursor-pointer min-w-90'>
+                                <div className='flex-1 mb-17 overflow-y-auto rounded-md mt-3 rounded-md  mr-5 lg:mr-0 ml-10  border-none ring-1 ring-foreground/10 hover:cursor-pointer min-w-90 max-h-130 '>
                                     <OrdersTable />
                                 </div>
                             </div>
-                            <div className='mt-3 mb-17 flex-1 mr-10 rounded-2xl bg-black min-w-0'>
+                            <div className='lg:mt-3 mb-17 flex-1 ml-10 lg:ml-0 rounded-2xl w-full mr-10'>
                                 <Map dummyData={dummyData} />
                             </div>
                         </div>
