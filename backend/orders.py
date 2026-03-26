@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import List, Optional
 
+import state
+
 
 class OrderStatus(str, Enum):
     PENDING = "pending"
@@ -121,21 +123,7 @@ def generate_solvice_payload(orders: Orders) -> dict:
         }
         jobs.append(job)
 
-    # for now
-    resources = [
-        {
-            "name": "courier-1",
-            "shifts": [
-                {
-                    "from": "2024-03-15T08:00:00Z",
-                    "to": "2024-03-15T18:00:00Z",
-                    "start": {"latitude": 28.616856, "longitude": 77.29401},
-                    "end": {"latitude": 28.616856, "longitude": 77.29401},
-                }
-            ],
-            "capacity": [50],
-        }
-    ]
+    resources = [state.rider.to_dict()]
 
     # final payload
     payload = {
