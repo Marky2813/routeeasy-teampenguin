@@ -1,4 +1,5 @@
 import os
+import threading
 import time
 from datetime import timedelta
 
@@ -39,6 +40,10 @@ def retrieve_post():
     if not ok:
         return {"message": "internal server error"}, 500
     else:
+        thread = threading.Thread(target=send_message)
+        thread.daemon = True
+        thread.start()
+        # send_message()
         return jsonify(state.orders.to_list()), 200
 
 
@@ -121,9 +126,7 @@ def whatsapp_webhook():
     return {"message": "Message Ignored."}
 
 
-@api.get("/send_mssg")
 def send_mssg():
-    count = 0
     result = []
     for order in state.orders.items:
         if order.status != OrderStatus.PENDING or order.notification_status:
@@ -131,10 +134,9 @@ def send_mssg():
         result.append(send_message(order))
         # result["order_id"] = order.order_id
         order.notification_status = 1
-        count += 1
         time.sleep(6)
 
-    return {"message": f"{count} messages sent.", "details": result}
+    # return {"message": f"{count} messages sent.", "details": result}
 
 
 def send_message(order):
