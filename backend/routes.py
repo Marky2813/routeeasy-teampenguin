@@ -77,14 +77,14 @@ def whatsapp_webhook():
     if order is None:
         return {"message": "Message Ignored."}
 
-    if data.get("message").lower() == "reschedule":
+    if "reschedule" in data.get("message").lower():
         requests.get(
             url=f"http://127.0.0.1:{state.port}/api/order/cancel/{order.order_id}"
         )
         # GET req. to: https://api.textmebot.com/send.php?recipient=[+91xxxxxxxxxx]&apikey=[TMB_API_KEY]&text=[TEXT]
         text = f"✅ Your request to reschedule the delivery for order ID {order.order_id} has been received and forwarded to the delivery team. \n\nPlease note: if this request is made less than 2 hours before the expected arrival time, the driver may still attempt delivery. \n\nThank you for your understanding."
         # return {"message": "Message Sent."}
-    elif data.get("message").lower() == "confirm":
+    elif "confirm" in data.get("message").lower():
         text = f"✅ Your delivery for order ID {order.order_id} has been successfully confirmed.\n\n🚚 Our delivery partner will arrive as per the scheduled time.\n\nThank you for your confirmation!"
     else:
         text = "Sorry, we didn’t understand your response.\nPlease reply with:\n1️⃣ Confirm \n2️⃣ Reschedule\n\nWe’re here to help!"
@@ -112,7 +112,7 @@ def send_mssg():
         # result["order_id"] = order.order_id
         order.notification_status = 1
         count += 1
-        time.sleep(5)
+        time.sleep(6)
 
     return {"message": f"{count} messages sent.", "details": result}
 

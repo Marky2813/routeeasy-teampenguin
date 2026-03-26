@@ -37,7 +37,20 @@ orders.items.extend(
             300,
             OrderStatus.PENDING,
             datetime(2026, 3, 26, 3, 30),
-            0
+            1
         ),
+        Order(
+            "003",
+            "Akash",
+            1.0,
+            "917011576727",
+            "DELHI ME KAHI",
+            1100067,
+            Coordinates(19.076090, 72.877426),
+            300,
+            OrderStatus.PENDING,
+            datetime(2026, 3, 26, 3, 30),
+            0
+        )
     ]
 )
