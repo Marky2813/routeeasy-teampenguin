@@ -46,7 +46,8 @@ class Order:
     handshake_duration: Optional[int] = 300
     status: Optional[OrderStatus] = OrderStatus.PENDING
     arrival: Optional[datetime] = None
-
+    notification_status: int = 0
+    
     @staticmethod
     def from_dict(data: dict) -> "Order":
         try:
