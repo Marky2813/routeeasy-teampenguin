@@ -40,11 +40,11 @@ class VrpResponsePayload(BaseModel):
         populate_by_name = True
 
 
-def solve_vrp() -> list | None:
+def solve_vrp() -> bool:
     SOLVICE_SOLVE_URL = "https://api.solvice.io/v2/vrp/solve"
     SOLVICE_URL = "https://api.solvice.io/v2/vrp/jobs/"
 
-    payload = generate_solvice_payload(state.orders, [])
+    payload = generate_solvice_payload(state.orders)
 
     get_req_headers = {"Authorization": state.api_key}
     post_req_headers = {
@@ -72,13 +72,13 @@ def solve_vrp() -> list | None:
                 break
             elif status in ("FAILED", "ERROR", "CANCELLED"):
                 print(f"Solver failed with status: {status}")
-                return
+                return False
 
             time.sleep(1)
             attempt += 1
         else:
             print("Timeout waiting for solution")
-            return
+            return False
 
         res = requests.get(solvice_solution_url, headers=get_req_headers)
         res.raise_for_status()
@@ -86,17 +86,15 @@ def solve_vrp() -> list | None:
 
     except requests.exceptions.RequestException as e:
         print(f"Request error: {e}")
-        return
+        return False
 
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return
+        return False
 
-    slots = []
     for visit in optimal_route.trips[0].visits:
-        slots.append({visit.job: visit.arrival})
         for order in state.orders.items:
             if order.order_id == visit.job:
                 order.arrival = visit.arrival
 
-    return slots
+    return True

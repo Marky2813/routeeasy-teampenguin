@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask import Blueprint, jsonify, request
 
 import state
-from orders import Coordinates, Order, OrderStatus
+from orders import Order, OrderStatus
 from vrp_api import solve_vrp
 
 api = Blueprint("api", __name__)
@@ -25,40 +25,30 @@ def retrive_post():
     if not orders:
         return jsonify({"error": "Missing or invalid JSON payload"}), 400
 
-    for order in orders:
-        try:
-            coo = Coordinates(
-                latitude=order.get("coordinates")[0],
-                longitude=order.get("coordinates")[1],
-            )
-            new_order = Order(
-                order_id=order.get("orderId"),
-                customer_name=order.get("customerName", "Unknown"),
-                package_weight=order.get("packageWeight(kg)"),
-                phone_number=order.get("phoneNumber"),
-                delivery_address=order.get("deliveryAddress"),
-                pincode=order.get("pincode"),
-                coordinates=coo,
-            )
-        except ValueError as e:
-            return jsonify({"error": "Validation failed", "details": str(e)}), 422
+    try:
+        new_orders = [Order.from_dict(order) for order in orders]
+    except (KeyError, TypeError, ValueError) as e:
+        return jsonify({"error": "Validation failed", "details": str(e)}), 422
 
-        state.orders.items.append(new_order)
+    state.orders.items.extend(new_orders)
 
-    slots = solve_vrp()
-    if slots is None:
+    print(f"Orders: {state.orders.items}")
+
+    # return jsonify({"message": "Orders added successfully"}), 200
+    ok = solve_vrp()
+    if not ok:
         return {"message": "internal server error"}, 500
     else:
-        return slots, 201
+        return jsonify(state.orders.to_list()), 200
 
 
 @api.get("/test_route")
 def test_route():
-    data = solve_vrp()
-    if data is None:
+    ok = solve_vrp()
+    if not ok:
         return {"message": "fucked"}, 401
     else:
-        return data
+        return jsonify(state.orders.to_list()), 200
 
 
 @api.get("/order/success/<order_id>")

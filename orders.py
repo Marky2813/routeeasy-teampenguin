@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 
 class OrderStatus(str, Enum):
@@ -15,6 +15,13 @@ class OrderStatus(str, Enum):
 class Coordinates:
     latitude: float
     longitude: float
+
+    @staticmethod
+    def from_list(coords: list[float]) -> "Coordinates":
+        return Coordinates(latitude=coords[0], longitude=coords[1])
+
+    def to_dict(self) -> list[float]:
+        return [self.latitude, self.longitude]
 
 
 @dataclass
@@ -30,13 +37,57 @@ class Order:
     status: Optional[OrderStatus] = OrderStatus.PENDING
     arrival: Optional[datetime] = None
 
+    @staticmethod
+    def from_dict(data: dict) -> "Order":
+        try:
+            return Order(
+                order_id=data["orderId"],
+                customer_name=data["customerName"],
+                phone_number=data["phoneNumber"],
+                delivery_address=data["deliveryAddress"],
+                pincode=data["pincode"],
+                package_weight=data["packageWeight"],
+                coordinates=Coordinates.from_list(data["coordinates"]),
+            )
+        except KeyError as e:
+            raise ValueError(f"Missing required field: {e}")
+
+    def to_dict(self) -> dict:
+        return {
+            "orderId": self.order_id,
+            "customerName": self.customer_name,
+            "phoneNumber": self.phone_number,
+            "deliveryAddress": self.delivery_address,
+            "pincode": self.pincode,
+            "packageWeight": self.package_weight,
+            "coordinates": self.coordinates.to_dict(),
+            "status": self.status.value if self.status else None,
+            "handshakeDuration": self.handshake_duration,
+            "arrival": self.arrival.isoformat() if self.arrival else None,
+            "timeWindow": self.get_time_window(),
+        }
+
+    def get_time_window(self) -> Optional[str]:
+        if not self.arrival:
+            return None
+        start = self.arrival - timedelta(hours=1)
+        end = self.arrival + timedelta(hours=1)
+
+        return f"{start.strftime('%I:%M %p').lstrip('0')} to {end.strftime('%I:%M %p').lstrip('0')}"
+
 
 class Orders:
     def __init__(self):
         self.items: list[Order] = []
 
+    def add_many(self, orders: List[Order]):
+        self.items.extend(orders)
 
-def generate_solvice_payload(orders: Orders, resources: list) -> dict:
+    def to_list(self) -> list[dict]:
+        return [order.to_dict() for order in self.items]
+
+
+def generate_solvice_payload(orders: Orders) -> dict:
     jobs = []
 
     for order in orders.items:

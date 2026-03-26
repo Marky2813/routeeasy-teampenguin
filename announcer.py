@@ -1,4 +1,3 @@
-import json
 import queue
 
 from flask import Response
@@ -13,7 +12,6 @@ class MessageAnnouncer:
         self.listeners = []
 
     def listen(self):
-        # Create a queue for a new client
         q = queue.Queue(maxsize=5)
         self.listeners.append(q)
         return q
