@@ -22,6 +22,11 @@ def health_check():
     return {"status": "ok"}
 
 
+@api.get("/orders/list")
+def get_orders():
+    return jsonify({"Orders": state.orders.to_list()})
+
+
 @api.post("/orders")
 def retrieve_post():
     orders = request.get_json()
@@ -99,6 +104,7 @@ def whatsapp_webhook():
     recipient = data.get("from")  # gives like 91XXXXXXXXXX
     order = check_order_details(receiver_phone=recipient)
     text = ""
+
     if order is None:
         return {"message": "Message Ignored."}
 
@@ -108,9 +114,11 @@ def whatsapp_webhook():
         )
         # GET req. to: https://api.textmebot.com/send.php?recipient=[+91xxxxxxxxxx]&apikey=[TMB_API_KEY]&text=[TEXT]
         text = f"✅ Your request to reschedule the delivery for order ID {order.order_id} has been received and forwarded to the delivery team. \n\nPlease note: if this request is made less than 2 hours before the expected arrival time, the driver may still attempt delivery. \n\nThank you for your understanding."
+
         # return {"message": "Message Sent."}
     elif "confirm" in data.get("message").lower():
         text = f"✅ Your delivery for order ID {order.order_id} has been successfully confirmed.\n\n🚚 Our delivery partner will arrive as per the scheduled time.\n\nThank you for your confirmation!"
+
     else:
         text = "Sorry, we didn’t understand your response.\nPlease reply with:\n1️⃣ Confirm \n2️⃣ Reschedule\n\nWe’re here to help!"
     print(
@@ -123,7 +131,7 @@ def whatsapp_webhook():
             },
         )
     )
-    return {"message": "Message Ignored."}
+    return {"message": "Message sent."}
 
 
 def send_mssg():
