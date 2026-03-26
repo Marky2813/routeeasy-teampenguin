@@ -33,8 +33,6 @@ def retrieve_post():
 
     state.orders.items.extend(new_orders)
 
-    print(f"Orders: {state.orders.items}")
-
     # return jsonify({"message": "Orders added successfully"}), 200
     ok = solve_vrp()
     if not ok:

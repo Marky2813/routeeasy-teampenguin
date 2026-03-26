@@ -24,6 +24,16 @@ class Coordinates:
         return [self.latitude, self.longitude]
 
 
+def round_up_to_5(dt):
+    if dt.minute % 5 == 0:
+        return dt
+    return (
+        dt
+        + timedelta(minutes=(5 - dt.minute % 5))
+        - timedelta(seconds=dt.second, microseconds=dt.microsecond)
+    )
+
+
 @dataclass
 class Order:
     order_id: str
@@ -70,8 +80,9 @@ class Order:
     def get_time_window(self) -> Optional[str]:
         if not self.arrival:
             return None
-        start = self.arrival - timedelta(hours=1)
-        end = self.arrival + timedelta(hours=1)
+        rounded_arrival = round_up_to_5(self.arrival)
+        start = rounded_arrival - timedelta(hours=1)
+        end = rounded_arrival + timedelta(hours=1)
 
         return f"{start.strftime('%I:%M %p').lstrip('0')} to {end.strftime('%I:%M %p').lstrip('0')}"
 
