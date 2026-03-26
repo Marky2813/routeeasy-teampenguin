@@ -86,7 +86,7 @@ def webhook():
     return {"message": "Message Ignored."}
 
 
-def check_order_details(receiver_phone) -> Order:  # input should be like +91XXXXXXXXXX
+def check_order_details(receiver_phone) -> Order | None:  # input should be like +91XXXXXXXXXX
     for order in state.orders.items:
         if receiver_phone in order.phone_number:
             if order.status != OrderStatus.PENDING:

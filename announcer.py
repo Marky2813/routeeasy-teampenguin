@@ -39,7 +39,7 @@ def sucessfull_order(order_id):
     return order_id
 
 
-@api.get("/order/failed/<order_id>")
+@api.get("/order/fail/<order_id>")
 def failed_order(order_id):
     for order in state.orders.items:
         if order.order_id == order_id:
