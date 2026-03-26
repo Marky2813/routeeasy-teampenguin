@@ -63,6 +63,7 @@ def solve_vrp() -> bool:
                 )
                 visit["customerName"] = order.customer_name
                 visit["deliveryAddress"] = order.delivery_address
+                visit["status"] = order.status
                 visit["timeWindow"] = order.get_time_window()
         state.rider.visits = visits
 

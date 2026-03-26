@@ -45,10 +45,9 @@ def retrieve_post():
     if not ok:
         return {"message": "internal server error"}, 500
     else:
-        thread = threading.Thread(target=send_message)
+        thread = threading.Thread(target=send_mssg)
         thread.daemon = True
         thread.start()
-        # send_message()
         return jsonify(state.orders.to_list()), 200
 
 
@@ -84,17 +83,23 @@ def get_solution():
 
 @api.get("/order/success/<order_id>")
 def successful_order(order_id):
+    order_map = {visit["job"]: visit for visit in state.rider.visits}
     for order in state.orders.items:
-        if order.order_id == order_id:
+        visit = order_map.get(order.order_id)
+        if visit is not None and order.order_id == order_id:
             order.status = OrderStatus.COMPLETED
+            visit["status"] = order.status
     return order_id
 
 
 @api.get("/order/fail/<order_id>")
 def failed_order(order_id):
+    order_map = {visit["job"]: visit for visit in state.rider.visits}
     for order in state.orders.items:
-        if order.order_id == order_id:
+        visit = order_map.get(order.order_id)
+        if visit is not None and order.order_id == order_id:
             order.status = OrderStatus.FAILED
+            visit["status"] = order.status
     return order_id
 
 
