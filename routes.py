@@ -61,6 +61,22 @@ def test_route():
         return data
 
 
+@api.get("/order/success/<order_id>")
+def sucessfull_order(order_id):
+    for order in state.orders.items:
+        if order.order_id == order_id:
+            order.status = OrderStatus.COMPLETED
+    return order_id
+
+
+@api.get("/order/fail/<order_id>")
+def failed_order(order_id):
+    for order in state.orders.items:
+        if order.order_id == order_id:
+            order.status = OrderStatus.FAILED
+    return order_id
+
+
 @api.post("/webhook")
 def webhook():
     data = request.get_json()
@@ -86,7 +102,9 @@ def webhook():
     return {"message": "Message Ignored."}
 
 
-def check_order_details(receiver_phone) -> Order | None:  # input should be like +91XXXXXXXXXX
+def check_order_details(
+    receiver_phone,
+) -> Order | None:  # input should be like +91XXXXXXXXXX
     for order in state.orders.items:
         if receiver_phone in order.phone_number:
             if order.status != OrderStatus.PENDING:

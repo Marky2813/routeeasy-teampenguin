@@ -30,30 +30,12 @@ announce_order = MessageAnnouncer()
 
 
 # announcer routes
-@api.get("/order/success/<order_id>")
-def sucessfull_order(order_id):
-    for order in state.orders.items:
-        if order.order_id == order_id:
-            order.status = OrderStatus.COMPLETED
-    announce_order.announce(json.dumps({order_id: OrderStatus.COMPLETED}))
-    return order_id
-
-
-@api.get("/order/fail/<order_id>")
-def failed_order(order_id):
-    for order in state.orders.items:
-        if order.order_id == order_id:
-            order.status = OrderStatus.FAILED
-    announce_order.announce(json.dumps({order_id: OrderStatus.FAILED}))
-    return order_id
-
-
 @api.get("/order/cancel/<order_id>")
 def cancel_order(order_id):
     for order in state.orders.items:
         if order.order_id == order_id:
             order.status = OrderStatus.CANCELLED
-    announce_order.announce(json.dumps({order_id: OrderStatus.CANCELLED}))
+    announce_order.announce(order_id)
     return order_id
 
 
