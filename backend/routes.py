@@ -35,12 +35,16 @@ def retrieve_post():
 
     state.orders.items.extend(new_orders)
 
-    # return jsonify({"message": "Orders added successfully"}), 200
     ok = solve_vrp()
     if not ok:
         return {"message": "internal server error"}, 500
     else:
         return jsonify(state.orders.to_list()), 200
+
+
+@api.get("/rider")
+def rider_provider():
+    return state.rider.to_dict(), 200
 
 
 @api.get("/test_route")

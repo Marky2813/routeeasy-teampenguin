@@ -1,13 +1,33 @@
 import os
 from datetime import datetime
+
 from dotenv import load_dotenv
+
 from orders import Coordinates, Order, Orders, OrderStatus
+from rider import Rider
 
 load_dotenv()
 port = int(os.getenv("PORT", 5000))
 api_key = os.getenv("SOLVICE_API_KEY")
 
 orders = Orders()
+
+rider = Rider(
+    name="rider-1",
+    shifts=[
+        {
+            "from": "2024-03-15T08:00:00Z",
+            "to": "2024-03-15T13:00:00Z",
+            "start": {"latitude": 28.616856, "longitude": 77.29401},
+        },
+        {
+            "from": "2024-03-15T14:00:00Z",
+            "to": "2024-03-15T18:00:00Z",
+            "start": {"latitude": 28.616856, "longitude": 77.29401},
+        },
+    ],
+    capacity=[50],
+)
 
 # For testing purposes
 # TEMPORARY ORDERS. In production, will added via POST req to /orders endpoint.
