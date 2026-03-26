@@ -13,9 +13,9 @@ def solve_vrp() -> bool:
 
     payload = generate_solvice_payload(state.orders)
 
-    get_req_headers = {"Authorization": state.api_key}
+    get_req_headers = {"Authorization": state.solvice_api_key}
     post_req_headers = {
-        "Authorization": state.api_key,
+        "Authorization": state.solvice_api_key,
         "Content-Type": "application/json",
     }
 
@@ -24,6 +24,7 @@ def solve_vrp() -> bool:
         res.raise_for_status()
 
         solvice_id = res.json().get("id")
+        state.last_order_solvice_id = solvice_id
         solvice_status_url = SOLVICE_URL + solvice_id + "/status"
         solvice_solution_url = SOLVICE_URL + solvice_id + "/solution"
 
@@ -40,7 +41,7 @@ def solve_vrp() -> bool:
                 print(f"Solver failed with status: {status}")
                 return False
 
-            time.sleep(1)
+            time.sleep(2)
             attempt += 1
         else:
             print("Timeout waiting for solution")
@@ -60,8 +61,9 @@ def solve_vrp() -> bool:
                 order.arrival = datetime.fromisoformat(
                     visit["arrival"].replace("Z", "+00:00")
                 )
-                visit["customer_name"] = order.customer_name
-                visit["delivery_address"] = order.delivery_address
+                visit["customerName"] = order.customer_name
+                visit["deliveryAddress"] = order.delivery_address
+                visit["timeWindow"] = order.get_time_window()
         state.rider.visits = visits
 
     except requests.exceptions.RequestException as e:

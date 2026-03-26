@@ -1,4 +1,6 @@
 import os
+import time
+from datetime import timedelta
 
 import requests
 from dotenv import load_dotenv
@@ -7,8 +9,6 @@ from flask import Blueprint, jsonify, request
 import state
 from orders import Order, OrderStatus
 from vrp_api import solve_vrp
-import time 
-from datetime import timedelta
 
 api = Blueprint("api", __name__)
 
@@ -54,6 +54,22 @@ def test_route():
         return {"message": "mayday"}, 401
     else:
         return jsonify(state.orders.to_list()), 200
+
+
+@api.get("/solution")
+def get_solution():
+    if state.last_order_solvice_id is None:
+        return {"message": "mayday"}, 401
+    SOLVICE_EXPLAINATION_URL = (
+        f"https://api.solvice.io/v2/vrp/jobs/{state.last_order_solvice_id}/explanation"
+    )
+
+    get_req_headers = {"Authorization": state.solvice_api_key}
+
+    res = requests.get(SOLVICE_EXPLAINATION_URL, headers=get_req_headers)
+    res.raise_for_status()
+
+    return res.json(), 200
 
 
 @api.get("/order/success/<order_id>")
@@ -131,14 +147,23 @@ def send_message(order):
 
         response = requests.get(
             url="https://api.textmebot.com/send.php",
-            params={"recipient": f"+{order.phone_number}", "apikey": tmb_api_key, "text": message_body},
-            timeout=10
+            params={
+                "recipient": f"+{order.phone_number}",
+                "apikey": tmb_api_key,
+                "text": message_body,
+            },
+            timeout=10,
         )
-        return {"status": "Message sent", "api_response": response.text, "order_id": order.order_id}
-        
+        return {
+            "status": "Message sent",
+            "api_response": response.text,
+            "order_id": order.order_id,
+        }
+
     except requests.RequestException as e:
         return {"status": "Failed", "error": str(e), "order_id": order.order_id}
-    
+
+
 def check_order_details(
     receiver_phone,
 ) -> Order | None:  # input should be like +91XXXXXXXXXX

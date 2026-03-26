@@ -49,7 +49,7 @@ class Order:
     status: Optional[OrderStatus] = OrderStatus.PENDING
     arrival: Optional[datetime] = None
     notification_status: int = 0
-    
+
     @staticmethod
     def from_dict(data: dict) -> "Order":
         try:
@@ -123,7 +123,13 @@ def generate_solvice_payload(orders: Orders) -> dict:
         }
         jobs.append(job)
 
-    resources = [state.rider.to_dict()]
+    resources = [
+        {
+            "name": state.rider.name,
+            "shifts": state.rider.shifts,
+            "capacity": state.rider.capacity,
+        }
+    ]
 
     # final payload
     payload = {
