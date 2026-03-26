@@ -11,6 +11,7 @@ from vrp_api import solve_vrp
 api = Blueprint("api", __name__)
 
 load_dotenv()
+TMB_API_KEY = os.getenv("TMB_API_KEY")
 
 
 @api.get("/health")
@@ -19,7 +20,7 @@ def health_check():
 
 
 @api.post("/orders")
-def retrive_post():
+def retrieve_post():
     orders = request.get_json()
 
     if not orders:
@@ -46,13 +47,13 @@ def retrive_post():
 def test_route():
     ok = solve_vrp()
     if not ok:
-        return {"message": "fucked"}, 401
+        return {"message": "mayday"}, 401
     else:
         return jsonify(state.orders.to_list()), 200
 
 
 @api.get("/order/success/<order_id>")
-def sucessfull_order(order_id):
+def successful_order(order_id):
     for order in state.orders.items:
         if order.order_id == order_id:
             order.status = OrderStatus.COMPLETED
@@ -68,27 +69,35 @@ def failed_order(order_id):
 
 
 @api.post("/webhook")
-def webhook():
+def whatsapp_webhook():
     data = request.get_json()
     recipient = data.get("from")  # gives like 91XXXXXXXXXX
     order = check_order_details(receiver_phone=recipient)
+    text = ""
     if order is None:
         return {"message": "Message Ignored."}
-    if data.get("message").lower() == "na":
-        # GET req. to: https://api.textmebot.com/send.php?recipient=[+91xxxxxxxxxx]&apikey=[TMB_API_KEY]&text=[TEXT]
-        tmb_api_key = os.getenv("TMB_API_KEY")
-        text = f"Your request to reschedule the delivery for order ID {order.order_id} has been received and forwarded to the delivery team. \n\nPlease note: if this request is made less than 4 hours before the expected arrival time, the driver may still attempt delivery today. \n\nThank you for your understanding."
-        print(
-            requests.get(
-                url="https://api.textmebot.com/send.php",
-                params={
-                    "recipient": f"+{recipient}",
-                    "apikey": tmb_api_key,
-                    "text": text,
-                },
-            )
+
+    if data.get("message").lower() == "reschedule":
+        requests.get(
+            url=f"http://127.0.0.1:{state.port}/api/order/cancel/{order.order_id}"
         )
-        return {"message": "Message Sent."}
+        # GET req. to: https://api.textmebot.com/send.php?recipient=[+91xxxxxxxxxx]&apikey=[TMB_API_KEY]&text=[TEXT]
+        text = f"✅ Your request to reschedule the delivery for order ID {order.order_id} has been received and forwarded to the delivery team. \n\nPlease note: if this request is made less than 2 hours before the expected arrival time, the driver may still attempt delivery. \n\nThank you for your understanding."
+        # return {"message": "Message Sent."}
+    elif data.get("message").lower() == "confirm":
+        text = f"✅ Your delivery for order ID {order.order_id} has been successfully confirmed.\n\n🚚 Our delivery partner will arrive as per the scheduled time.\n\nThank you for your confirmation!"
+    else:
+        text = "Sorry, we didn’t understand your response.\nPlease reply with:\n1️⃣ Confirm \n2️⃣ Reschedule\n\nWe’re here to help!"
+    print(
+        requests.get(
+            url="https://api.textmebot.com/send.php",
+            params={
+                "recipient": f"+{recipient}",
+                "apikey": TMB_API_KEY,
+                "text": text,
+            },
+        )
+    )
     return {"message": "Message Ignored."}
 
 

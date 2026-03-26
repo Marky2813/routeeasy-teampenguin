@@ -1,13 +1,11 @@
 import os
 from datetime import datetime
-
 from dotenv import load_dotenv
-
 from orders import Coordinates, Order, Orders, OrderStatus
 
 load_dotenv()
 port = int(os.getenv("PORT", 5000))
-api_key = os.getenv("API_KEY")
+api_key = os.getenv("SOLVICE_API_KEY")
 
 orders = Orders()
 
