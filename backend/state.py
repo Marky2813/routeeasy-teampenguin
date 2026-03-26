@@ -24,6 +24,7 @@ orders.items.extend(
             300,
             OrderStatus.PENDING,
             datetime(2026, 3, 26, 3, 30),
+            0
         ),
         Order(
             "002",
@@ -36,6 +37,7 @@ orders.items.extend(
             300,
             OrderStatus.PENDING,
             datetime(2026, 3, 26, 3, 30),
+            0
         ),
     ]
 )
