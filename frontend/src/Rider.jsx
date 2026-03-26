@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "./components/ui/button";
 import { useZus } from "./store";
 import { Separator } from "@/components/ui/separator";
@@ -300,7 +300,17 @@ const data={
 function Rider() {
   const stops = useZus((state) => state.ordersCount);
   const orders = useZus((state) => state.ordersData);
-
+  const currentIndex = useRef(Number(localStorage.getItem("index")) || 0); 
+  useEffect(() => {
+    addEventListener("beforeunload", setIndex)
+    function setIndex() {
+      window.localStorage.setItem("index", currentIndex.current);
+    }
+    return () => {
+      window.removeEventListener("beforeunload",  setIndex); 
+      setIndex(); 
+    }
+  }, []) 
   
   function clickFn() {
     console.log(orders)
