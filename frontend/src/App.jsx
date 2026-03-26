@@ -609,7 +609,7 @@ function App() {
                                         <CardHeader>
                                             <CardTitle className=" text-xl underline decoration-dotted decoration-gray-400 decorati  on-2 underline-offset-3">Order Entry</CardTitle>
                                             <CardAction >
-                                                <Button variant='link' className="text-blue-600 decoration-solid underline" size='sm' onClick={downloadSampleXLSX}>Sample File</Button>
+                                                <Button variant='link' className="text-blue-600 decoration-solid underline cursor-pointer" size='sm' onClick={downloadSampleXLSX}>Sample File</Button>
                                             </CardAction>
                                         </CardHeader>
                                         <CardContent className="text-xl -mt-3 font-semibold">

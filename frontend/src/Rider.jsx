@@ -7,29 +7,6 @@ const data={
   "name": "rider-1",
   "visits": [
     {
-      "arrival": "2026-03-26T08:00:00Z",
-      "breakTime": 0,
-      "customer_name": "Yash Mishra",
-      "delivery_address": "Flat 9B, Royal Heights, Rohini Sector 11",
-      "job": "RE-10036",
-      "latlon": [
-        28.727662,
-        77.105078
-      ],
-      "location": {
-        "latitude": 28.7288259,
-        "longitude": 77.1068059
-      },
-      "serviceTime": 300,
-      "snappedLocation": {
-        "latitude": 28.727662,
-        "longitude": 77.105078
-      },
-      "time_window": "7:00 AM to 9:00 AM",
-      "travelTime": 0,
-      "waitTime": 0
-    },
-    {
       "arrival": "2026-03-26T08:17:21Z",
       "breakTime": 0,
       "customer_name": "Gaurav Mehta",
@@ -298,8 +275,6 @@ const data={
 
 
 function Rider() {
-  const stops = useZus((state) => state.ordersCount);
-  const orders = useZus((state) => state.ordersData);
   const currentIndex = useRef(Number(localStorage.getItem("index")) || 0); 
   useEffect(() => {
     addEventListener("beforeunload", setIndex)
@@ -310,23 +285,39 @@ function Rider() {
       window.removeEventListener("beforeunload",  setIndex); 
       setIndex(); 
     }
-  }, []) 
+  }, [])
+
+  const currentStop = data.visits[currentIndex.current];
+  const remainingStops = data.visits.filter((ele) => currentStop.job !== ele.job).map((ele) => ({
+    ...ele, delivery_address: ele.delivery_address.split(",").slice(1).join(",")
+  }));
+
+  //formatting the delivery addresses 
+  // for(let i = 0; i < remainingStops.length; i++) {
+  //   const address = remainingStops[i].delivery_address.split(",");
+  //   address.splice(0,1);
+  //   let newAddress = address.join(","); 
+  //   remainingStops[i].delivery_address = newAddress.trimStart(); 
+  // }
+  
+
+  //current stop revers to the object which refers to the data being delivered now.  
   
   function clickFn() {
-    console.log(orders)
+    console.log(remainingStops)
   }
  return(
   <>
   <div className="mt-3 ml-2">
    <p className="text-sm font-semibold">RouteEasy • Ravi Bhai</p>
-  <h1 className="text-lg font-bold">{stops} Stops Today</h1>
+  <h1 className="text-lg font-bold">{remainingStops.length} Stops Today</h1>
   <p className="text-sm font-semibold">Optimised route • 50km total</p>
   </div>
   <div className="mt-3 text-white bg-black mx-2 rounded-lg mb-8"> 
     <h3 className="font-thin text-sm p-2">Current Stop:</h3>
-    <h2 className="text-sm font-bold pl-2">Honey Singh</h2>
-    <h3 className="text-sm pl-2 font-thin">Blue Eyes Chowk, sector16, dwarka</h3>
-    <h3 className="text-sm pl-2 font-thin pb-2">Window 10:00am-12:00am</h3>
+    <h2 className="text-sm font-bold pl-2">{currentStop.customer_name}</h2>
+    <h3 className="text-sm pl-2 font-thin">{currentStop.delivery_address}</h3>
+    <h3 className="text-sm pl-2 font-thin pb-2">Window: {currentStop.time_window}</h3>
     <div className="flex flex-col p-2 gap-1">
     <Button type = 'button' onClick={clickFn} className='dark'>Navigate to stop</Button>
     <Button type = 'button' className='dark'>Mark as failed</Button>
@@ -338,6 +329,21 @@ function Rider() {
   </div>
   <div className="mt-2">
     <h3 className="text-md font-semibold ml-2">Upcoming Stops</h3>
+    <div className="h-80 overflow-x-auto mx-4 text-sm ">
+    {remainingStops.map((ele) => {
+      return (
+       <>
+        <div className="flex gap-15 my-2">
+          <div className="flex flex-col">
+          <div>{ele.customer_name}</div>
+          <div>{ele.delivery_address}</div>
+          </div>
+          <div>{ele.time_window}</div>
+        </div>
+       </> 
+      )
+    })}
+    </div>
   </div>
   </>
  )
