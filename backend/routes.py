@@ -7,6 +7,8 @@ from flask import Blueprint, jsonify, request
 import state
 from orders import Order, OrderStatus
 from vrp_api import solve_vrp
+import time 
+from datetime import timedelta
 
 api = Blueprint("api", __name__)
 
@@ -99,6 +101,40 @@ def whatsapp_webhook():
     return {"message": "Message Ignored."}
 
 
+@api.get("/send_mssg")
+def send_mssg():
+    count = 0
+    result = []
+    for order in state.orders.items:
+        if order.status != OrderStatus.PENDING or order.notification_status:
+            continue
+        result.append(send_message(order))
+        # result["order_id"] = order.order_id
+        order.notification_status = 1
+        count += 1
+        time.sleep(5)
+
+    return {"message": f"{count} messages sent.", "details": result}
+
+
+def send_message(order):
+    tmb_api_key = os.getenv("TMB_API_KEY")
+    if not tmb_api_key:
+        return jsonify({"error": "TextMeBot API key not found"}), 500
+
+    try:
+        message_body = f"Hi {order.customer_name} 👋 \n\nYour delivery is scheduled between: ⏰ {(order.arrival - timedelta(minutes=83)).strftime('%H:%M')} - {(order.arrival + timedelta(minutes=37)).strftime('%H:%M')}\n\nReply: \nCONFIRM ✅ \nRESCHEDULE 🔁 \nOrder ID: {order.order_id}"
+
+        response = requests.get(
+            url="https://api.textmebot.com/send.php",
+            params={"recipient": f"+{order.phone_number}", "apikey": tmb_api_key, "text": message_body},
+            timeout=10
+        )
+        return {"status": "Message sent", "api_response": response.text, "order_id": order.order_id}
+        
+    except requests.RequestException as e:
+        return {"status": "Failed", "error": str(e), "order_id": order.order_id}
+    
 def check_order_details(
     receiver_phone,
 ) -> Order | None:  # input should be like +91XXXXXXXXXX
