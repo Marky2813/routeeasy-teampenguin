@@ -36,11 +36,38 @@ def cancel_order(order_id):
         if visit is not None and order.order_id == order_id:
             order.status = OrderStatus.CANCELLED
             visit["status"] = order.status
-    announce_order.announce(order_id)
-    return order_id
+    msg = {order_id: "cancelled"}
+    announce_order.announce(msg)
+    return msg
 
 
-@api.get("/order/get/cancelled/")
+@api.get("/order/success/<order_id>")
+def successful_order(order_id):
+    order_map = {visit["job"]: visit for visit in state.rider.visits}
+    for order in state.orders.items:
+        visit = order_map.get(order.order_id)
+        if visit is not None and order.order_id == order_id:
+            order.status = OrderStatus.COMPLETED
+            visit["status"] = order.status
+    msg = {order_id: "completed"}
+    announce_order.announce(msg)
+    return msg
+
+
+@api.get("/order/fail/<order_id>")
+def failed_order(order_id):
+    order_map = {visit["job"]: visit for visit in state.rider.visits}
+    for order in state.orders.items:
+        visit = order_map.get(order.order_id)
+        if visit is not None and order.order_id == order_id:
+            order.status = OrderStatus.FAILED
+            visit["status"] = order.status
+    msg = {order_id: "failed"}
+    announce_order.announce(msg)
+    return msg
+
+
+@api.get("/order/get/status")
 def get_cancelled_order():
     def event_stream():
         messages = announce_order.listen()

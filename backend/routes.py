@@ -92,28 +92,6 @@ def get_solution():
     return res.json(), 200
 
 
-@api.get("/order/success/<order_id>")
-def successful_order(order_id):
-    order_map = {visit["job"]: visit for visit in state.rider.visits}
-    for order in state.orders.items:
-        visit = order_map.get(order.order_id)
-        if visit is not None and order.order_id == order_id:
-            order.status = OrderStatus.COMPLETED
-            visit["status"] = order.status
-    return order_id
-
-
-@api.get("/order/fail/<order_id>")
-def failed_order(order_id):
-    order_map = {visit["job"]: visit for visit in state.rider.visits}
-    for order in state.orders.items:
-        visit = order_map.get(order.order_id)
-        if visit is not None and order.order_id == order_id:
-            order.status = OrderStatus.FAILED
-            visit["status"] = order.status
-    return order_id
-
-
 @api.post("/webhook")
 def whatsapp_webhook():
     data = request.get_json()
