@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import './App.css'
@@ -528,27 +528,28 @@ function App() {
     // const failed = data.filter(o => o.status === "failed").length
 
 
-    function handleSubmit() {
+    async function handleSubmit() {
         const reader = new FileReader();
         
         //filereader is a browser api which reads file asynchronously. so we define what needs to be done when the reader is done reading, the browser will call this onload automatically. 
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             const workbook = XLSX.read(e.target.result, { type: "array" });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const res = XLSX.utils.sheet_to_json(firstSheet);
-            setData(res); 
-            // const result = axios.post('http://localhost:5000/api/orders', dummyData)
+            const geocoded = await Promise.all(res.map(async (e) => {
+              let address = e.deliveryAddress.split(" ").join("+") + `,${e.pincode}`;
+              const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`);
+              const coordinates = [response.data.results[0].geometry.location.lat, response.data.results[0].geometry.location.lng];
+              e.coordinates = coordinates;  
+              return e;
+            }));
+            const optimized = await axios.post('http://localhost:5000/api/orders', geocoded);
+            console.log(optimized.data)
+            setData(optimized.data)
+             
+            // const result = axios.post('http://localhost:5000/api/orders', res)
             // result.then((res) => console.log(res));
-            //data[i] refers to an object and uss object ka deliveryAddress and pincode use karke we will be sending the geocoding request. 
-            // let arr = Promise.all(data.map(async (e) => {
-            //   let address = e.deliveryAddress.split(" ").join("+") + `,${e.pincode}`;
-            //   const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`);
-            //   const coordinates = [response.data.results[0].geometry.location.lat, response.data.results[0].geometry.location.lng];
-            //   e.coordinates = coordinates;  
-            //   return e;
-            // }))
-            // arr.then((val) => console.log(val))
-
+            // data[i] refers to an object and uss object ka deliveryAddress and pincode use karke we will be sending the geocoding request. 
             //the flow is get json from file -> geocode -> send to api -> get response as an array -> this array of orders is going to be global state of orders list, available to the table and the rider -> total number of orders ka global state -> failed ka global state. 
         };
 
