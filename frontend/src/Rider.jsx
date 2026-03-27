@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "./components/ui/button";
 import axios from 'axios';
 import { Separator } from "@/components/ui/separator";
-
-// const data = {
+import { useRid } from './riderstore'
 //   "name": "rider-1",
 //   "visits": [
 //     {
@@ -794,7 +793,8 @@ import { Separator } from "@/components/ui/separator";
 
 function Rider() {
   const [allocated, setAllocated] = useState(false);
-  const [visits, setVisits] = useState([]);
+  const visits = useRid((state) => state.visits);
+  const setVisits = useRid((state) => state.updateVisits)
   const [currentIndex, setCurrentIndex] = useState(() => Number(localStorage.getItem("index")) || 0);
   const currentIndexRef = useRef(currentIndex);
   useEffect(() => {
@@ -878,7 +878,7 @@ function Rider() {
       <div className="mt-3 ml-2">
         {allocated ? (
           <>
-            <p className="text-sm font-semibold">RouteEasy • Ravi Bhai</p>
+            <p className="text-sm font-semibold">RouteEasy • Ravi Bhadhur</p>
             <h1 className="text-lg font-bold">{remainingStops.length} Stops Today</h1>
             <p className="text-sm font-semibold">Optimised route • 50km total</p>
           </>
@@ -886,7 +886,7 @@ function Rider() {
           :
           (
             <>
-              <p className="text-sm font-semibold">RouteEasy • Ravi Bhai</p>
+              <p className="text-sm font-semibold">RouteEasy • Ravi Bhadhur</p>
               <h1 className="text-lg font-bold">No orders alloted</h1>
               <p className="text-sm font-semibold">Optimised route • -</p>
             </>
@@ -936,7 +936,7 @@ function Rider() {
                     <div className="text-base font-semibold">{ele.customerName}</div>
                     <div className="text-xs w-35">{ele.deliveryAddress}</div>
                   </div>
-                  <div className="text-sm font-semibold">{ele.timeWindow}</div>
+                  <div className="text-sm font-semibold">{ele.status === "pending" ? <>{ele.timeWindow}</>:<p className="text-red-600">cancelled</p>}</div>
                 </div>
                 <Separator className='my-2 bg-black' />
               </>

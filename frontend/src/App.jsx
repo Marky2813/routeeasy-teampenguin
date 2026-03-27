@@ -19,7 +19,6 @@ import Map from './Map'
 import OrdersTable from './OrdersTable'
 import axios from "axios"
 import  {EventSource } from "eventsource";
-import SSEListener from './SSEListenere'
 import { useZus } from './store'
 import { Spinner } from "@/components/ui/spinner"
 
@@ -573,7 +572,7 @@ function App() {
 
     return (
         <>
-            {/* <SSEListener /> */}
+            
             <TooltipProvider>
                 <SidebarProvider>
                     <AppSidebar />
