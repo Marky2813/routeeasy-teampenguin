@@ -27,44 +27,38 @@ class MessageAnnouncer:
 announce_order = MessageAnnouncer()
 
 
+def update_order_status(order_id, status, label):
+    order = state.order_map.get(order_id)
+    if not order:
+        return {"error": "Order not found"}, 404
+
+    visit = state.visit_map.get(order_id)
+    if not visit:
+        return {"error": "Rider visit not found"}, 404
+
+    order.status = status
+    visit["status"] = status
+
+    msg = {order_id: label}
+    announce_order.announce(msg)
+
+    return msg
+
+
 # announcer routes
 @api.get("/order/cancel/<order_id>")
 def cancel_order(order_id):
-    order_map = {visit["job"]: visit for visit in state.rider.visits}
-    for order in state.orders.items:
-        visit = order_map.get(order.order_id)
-        if visit is not None and order.order_id == order_id:
-            order.status = OrderStatus.CANCELLED
-            visit["status"] = order.status
-    msg = {order_id: "cancelled"}
-    announce_order.announce(msg)
-    return msg
+    return update_order_status(order_id, OrderStatus.CANCELLED, "cancelled")
 
 
-@api.get("/order/success/<order_id>")
+@api.get("/order/complete/<order_id>")
 def successful_order(order_id):
-    order_map = {visit["job"]: visit for visit in state.rider.visits}
-    for order in state.orders.items:
-        visit = order_map.get(order.order_id)
-        if visit is not None and order.order_id == order_id:
-            order.status = OrderStatus.COMPLETED
-            visit["status"] = order.status
-    msg = {order_id: "completed"}
-    announce_order.announce(msg)
-    return msg
+    return update_order_status(order_id, OrderStatus.COMPLETED, "completed")
 
 
 @api.get("/order/fail/<order_id>")
 def failed_order(order_id):
-    order_map = {visit["job"]: visit for visit in state.rider.visits}
-    for order in state.orders.items:
-        visit = order_map.get(order.order_id)
-        if visit is not None and order.order_id == order_id:
-            order.status = OrderStatus.FAILED
-            visit["status"] = order.status
-    msg = {order_id: "failed"}
-    announce_order.announce(msg)
-    return msg
+    return update_order_status(order_id, OrderStatus.FAILED, "failed")
 
 
 @api.get("/order/get/status")

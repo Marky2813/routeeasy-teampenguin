@@ -53,6 +53,7 @@ def solve_vrp() -> bool:
         optimal_route = res.json()
 
         order_map = {order.order_id: order for order in state.orders.items}
+        state.order_map = order_map
         visits = optimal_route["trips"][0]["visits"]
 
         for visit in visits:
@@ -66,6 +67,8 @@ def solve_vrp() -> bool:
                 visit["status"] = order.status
                 visit["timeWindow"] = order.get_time_window()
         state.rider.visits = visits
+
+        state.visit_map = {visit["job"]: visit for visit in state.rider.visits}
 
     except requests.exceptions.RequestException as e:
         print(f"Request error: {e}")
