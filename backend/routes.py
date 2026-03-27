@@ -65,6 +65,17 @@ def test_route():
         return jsonify(state.orders.to_list()), 200
 
 
+@api.get("/notification/flip/<order_id>")
+def flip_notification(order_id):
+    for order in state.orders.items:
+        if order.order_id == order_id:
+            order.notification_status = 1 if order.notification_status == 0 else 0
+            return {
+                "message": f"Notification status flipped to {order.notification_status}"
+            }
+    return {"message": "Number not associated with any pending orders"}
+
+
 @api.get("/solution")
 def get_solution():
     if state.last_order_solvice_id is None:
@@ -139,6 +150,7 @@ def whatsapp_webhook():
     return {"message": "Message sent."}
 
 
+@api.get("notification/send")
 def send_mssg():
     result = []
     for order in state.orders.items:
@@ -148,6 +160,9 @@ def send_mssg():
         # result["order_id"] = order.order_id
         order.notification_status = 1
         time.sleep(6)
+    return {
+        "message": f"Notifications sent to all pending orders with notification consent. Count: {len(result)}"
+    }
 
     # return {"message": f"{count} messages sent.", "details": result}
 
@@ -169,6 +184,7 @@ def send_message(order):
             },
             timeout=10,
         )
+        print(f"{order.phone_number}\n" + response.text)
         return {
             "status": "Message sent",
             "api_response": response.text,
@@ -183,7 +199,7 @@ def check_order_details(
     receiver_phone,
 ) -> Order | None:  # input should be like +91XXXXXXXXXX
     for order in state.orders.items:
-        if receiver_phone in order.phone_number:
+        if order.phone_number[-10:] in receiver_phone:
             if order.status != OrderStatus.PENDING:
                 continue  # receiver might have multiple orders, so can't simply return None on their first order, simply return all the orders with pending status? or just the first order for now.
             return order

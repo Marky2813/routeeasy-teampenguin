@@ -48,7 +48,7 @@ class Order:
     handshake_duration: Optional[int] = 300
     status: Optional[OrderStatus] = OrderStatus.PENDING
     arrival: Optional[datetime] = None
-    notification_status: int = 0
+    notification_status: int = 1  # 0: notification not sent yet, 1: notification sent
 
     @staticmethod
     def from_dict(data: dict) -> "Order":
@@ -78,6 +78,7 @@ class Order:
             "handshakeDuration": self.handshake_duration,
             "arrival": self.arrival.isoformat() if self.arrival else None,
             "timeWindow": self.get_time_window(),
+            "NotificationStatus": self.notification_status,
         }
 
     def get_time_window(self) -> Optional[str]:
