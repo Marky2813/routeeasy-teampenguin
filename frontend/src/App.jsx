@@ -21,6 +21,7 @@ import axios from "axios"
 import  {EventSource } from "eventsource";
 import SSEListener from './SSEListenere'
 import { useZus } from './store'
+import { Spinner } from "@/components/ui/spinner"
 
 
 
@@ -508,6 +509,7 @@ const dummyData = [
 ]
 
 function App() {
+    const [optimizing, setOptimizing] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [file, setFile] = useState(null);
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -526,6 +528,7 @@ function App() {
     const data = useZus((state) => state.ordersData); 
     const setData = useZus((state) => state.updateOrders);
     // const failed = data.filter(o => o.status === "failed").length
+    const failedDeliveries = (data.filter((e) => e.status  === "failed").length || 0);
 
 
     async function handleSubmit() {
@@ -546,6 +549,7 @@ function App() {
             const optimized = await axios.post('http://localhost:5000/api/orders', geocoded);
             console.log(optimized.data)
             setData(optimized.data)
+            setOptimizing(false);
              
             // const result = axios.post('http://localhost:5000/api/orders', res)
             // result.then((res) => console.log(res));
@@ -554,7 +558,8 @@ function App() {
         };
 
         reader.readAsArrayBuffer(file);
-        setSubmitted(false)
+        setSubmitted(false);
+        setOptimizing(true);
     }
 
     const downloadSampleXLSX = () => {
@@ -592,7 +597,7 @@ function App() {
                                             <CardAction></CardAction>
                                         </CardHeader>
                                         <CardContent className="xl:text-xl text-md -mt-3 font-semibold">
-                                            <p>5</p>
+                                            <p>{failedDeliveries}</p>
                                         </CardContent>
                                     </Card>
                                     <Card className="min-w-30 flex-1 h-auto h-fit">
@@ -614,15 +619,16 @@ function App() {
                                             </CardAction>
                                         </CardHeader>
                                         <CardContent className="text-xl -mt-3 font-semibold">
-                                            {!submitted && <div className='items-center flex gap-1 justify-center flex-col mt-5 mb-3'>
-                                                {/* <input 
-                  type='file'
-                  accept='.csv'
-                  onChange={onFileChange}
-                  ref = {inputRef}
-                  className='hidden'></input>
-                  <Button variant="outline" size="lg" onClick={() => inputRef.current.click()}>Upload CSV</Button>
-                  {file && <span className='text-sm text-muted-foreground'>{file.name}</span>} */}
+                                         {optimizing ? 
+                                         <>
+                                          <div className='flex text-lg gap-1 items-center justify-center mt-3 mb-3 font-base'>
+                                          <Spinner />
+                                          <p>Please wait, optimizing routes!</p>
+                                          </div>
+                                         </>
+                                         :
+                                         <>
+                                         {!submitted && <div className='items-center flex gap-1 justify-center flex-col mt-5 mb-3'>
                                                 <div {...getRootProps()}
                                                     className='border-1 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors 
           ${isDragActive ? "border-primary bg-primary/10" : "border-muted-foreground/30"}'>
@@ -639,10 +645,9 @@ function App() {
                                                             setSubmitted(false);
                                                         }}>Clear</Button>
                                                     </div>
-
                                                 </div>
-
                                             }
+                                         </>}
                                         </CardContent>
                                     </Card>
                                 </div>
