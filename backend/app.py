@@ -1,5 +1,6 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
 
 import announcer
 import state
@@ -17,6 +18,12 @@ def create_app():
             "status": "running",
             "version": "1.0",
         }
+
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(e):
+        return jsonify(
+            {"error": e.name, "message": e.description, "status": e.code}
+        ), e.code
 
     return app
 
