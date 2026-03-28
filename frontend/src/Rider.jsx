@@ -853,10 +853,18 @@ function Rider() {
     //this function needs to set the status as failed, then take the id and send it to the backend and shift the next to the next one
     try {
     await axios.get(`http://localhost:5000/api/order/fail/${job}`)
-    setCurrentIndex(prev => prev + 1);
-    currentIndexRef.current = ++currentIndexRef.current;
-    if (currentIndexRef.current === currentIndex) setAllocated(false);
     currentStop.status = "failed";
+    currentIndexRef.current = ++currentIndexRef.current;
+    if(currentIndexRef.current === visits.length) {
+      currentIndexRef.current = 0; 
+      setAllocated(false); 
+      setCurrentIndex(0); 
+      alert("all orders have been delivered successfully")
+      //make one completed deliveries state
+      return; 
+    }
+    setCurrentIndex(prev => prev + 1);
+    console.log(currentIndex, currentIndexRef.current)
     } catch(err) {
       console.error("Unable to mark delivery as failed", err)
     }
@@ -865,10 +873,9 @@ function Rider() {
   async function orderDelivered(job) {
     try {
     await axios.get(`http://localhost:5000/api/order/success/${job}`)
+    currentStop.status = "success";
     setCurrentIndex(prev => prev + 1);
     currentIndexRef.current = ++currentIndexRef.current;
-    if (currentIndexRef.current === currentIndex) setAllocated(false);
-    currentStop.status = "success";
     } catch(err) {
       console.error("Unable to mark delivery as success", err)
     }
@@ -879,7 +886,7 @@ function Rider() {
         {allocated ? (
           <>
             <p className="text-sm font-semibold">RouteEasy • Ravi Bhadhur</p>
-            <h1 className="text-lg font-bold">{remainingStops.length} Stops Today</h1>
+            <h1 className="text-lg font-bold">{remainingStops.length + 1} Stops Today</h1>
             <p className="text-sm font-semibold">Optimised route • 50km total</p>
           </>
         )
@@ -950,9 +957,8 @@ function Rider() {
 
 export default Rider;
 
-//the things which need to be handled here,
-//- if there are no deliveries alloted,i.e visits length is 0, then simply show that no deliveries have been alloted
-//- if deliveries are present, we need to show them, all of these are pending
-//- the sse will send data: id, add state and set it as cancelled, in the list show cancelled.
-//there will be a current variable which will point to the first order, this will be saved in localstorage. then as the orders are marked as delivered it will jump to the next one.
-//and the object in the current will not be in the list and it should not have a status of pending 
+//agendas for today
+//- when rider marks the deliveries as failed or completed. 
+//a) the top 4 orders remain static and the rest keep changing, why is this. 
+//b) they aren't being updated on the dashboard front.
+//local storage needs to reset everyday or on every upload.   

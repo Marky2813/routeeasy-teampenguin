@@ -621,7 +621,7 @@ function App() {
                                          {optimizing ? 
                                          <>
                                           <div className='flex text-lg gap-1 items-center justify-center mt-3 mb-3 font-base'>
-                                          <Spinner />
+                                          <Spinner className='mt-0.8'/>
                                           <p>Please wait, optimizing routes!</p>
                                           </div>
                                          </>
