@@ -39,7 +39,8 @@ def retrieve_post():
     except (KeyError, TypeError, ValueError) as e:
         return jsonify({"error": "Validation failed", "details": str(e)}), 422
 
-    state.orders.items.extend(new_orders)
+    # state.orders.items.extend(new_orders)
+    state.orders.items = new_orders
 
     ok = solve_vrp()
     if not ok:

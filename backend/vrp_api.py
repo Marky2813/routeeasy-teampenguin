@@ -66,8 +66,8 @@ def solve_vrp() -> bool:
                 visit["deliveryAddress"] = order.delivery_address
                 visit["status"] = order.status
                 visit["timeWindow"] = order.get_time_window()
-        state.rider.visits = visits
 
+        state.rider.visits = visits
         state.visit_map = {visit["job"]: visit for visit in state.rider.visits}
 
     except requests.exceptions.RequestException as e:
