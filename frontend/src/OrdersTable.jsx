@@ -4,6 +4,7 @@ import { useZus } from "./store";
 
 function OrdersTable() {
     const data = useZus((state) => state.ordersData);
+    console.log("hello from the orders table", data)
   return (
     <>
      <div>

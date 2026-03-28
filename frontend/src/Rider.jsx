@@ -872,10 +872,18 @@ function Rider() {
 
   async function orderDelivered(job) {
     try {
-    await axios.get(`http://localhost:5000/api/order/success/${job}`)
+    await axios.get(`http://localhost:5000/api/order/complete/${job}`)
     currentStop.status = "success";
-    setCurrentIndex(prev => prev + 1);
     currentIndexRef.current = ++currentIndexRef.current;
+    if(currentIndexRef.current === visits.length) {
+      currentIndexRef.current = 0; 
+      setAllocated(false); 
+      setCurrentIndex(0); 
+      alert("all orders have been delivered successfully")
+      //make one completed deliveries state
+      return; 
+    }
+    setCurrentIndex(prev => prev + 1);
     } catch(err) {
       console.error("Unable to mark delivery as success", err)
     }

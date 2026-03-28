@@ -1,4 +1,5 @@
 import queue
+import json
 
 from flask import Response
 
@@ -40,7 +41,7 @@ def update_order_status(order_id, status, label):
     visit["status"] = status
 
     msg = {order_id: label}
-    announce_order.announce(msg)
+    announce_order.announce(json.dumps(msg))
 
     return msg
 

@@ -10,11 +10,13 @@ function SSEListener() {
     es.onmessage = (e) => {
       const latestData = useZus.getState().ordersData;
       const latestRiderData = useRid.getState().visits;
-      console.log(e.data)
-      const newStatus = e.data;
+      console.log("typeof e.data:", typeof e.data);  
+      const newStatus = JSON.parse(e.data);
       const jobId = Object.keys(newStatus)[0];
+        console.log("jobId:", jobId);                    // 👈
+        console.log("latestData:", latestData); 
       setData(latestData.map(order =>
-        order.job === jobId ? { ...order, status: newStatus[jobId] } : order
+        order.orderId == jobId ? { ...order, status: newStatus[jobId] } : order
       ));
       setVisits(latestRiderData.map(order =>
         order.job === jobId ? { ...order, status: newStatus[jobId] } : order

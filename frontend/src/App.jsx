@@ -546,8 +546,8 @@ function App() {
               return e;
             }));
             const optimized = await axios.post('http://localhost:5000/api/orders', geocoded);
-            console.log(optimized.data)
-            setData(optimized.data)
+            console.log(optimized.data);
+            setData(optimized.data);
             setOptimizing(false);
              
             // const result = axios.post('http://localhost:5000/api/orders', res)
