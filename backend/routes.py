@@ -39,7 +39,6 @@ def retrieve_post():
     except (KeyError, TypeError, ValueError) as e:
         return jsonify({"error": "Validation failed", "details": str(e)}), 422
 
-    # state.orders.items.extend(new_orders)
     state.orders.items = new_orders
 
     ok = solve_vrp()
@@ -54,7 +53,7 @@ def retrieve_post():
 
 @api.get("/rider")
 def rider_provider():
-    return state.rider.to_dict(), 200
+    return jsonify(state.rider.to_list()), 200
 
 
 @api.get("/test_route")

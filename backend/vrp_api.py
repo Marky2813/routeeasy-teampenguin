@@ -56,19 +56,15 @@ def solve_vrp() -> bool:
         state.order_map = order_map
         visits = optimal_route["trips"][0]["visits"]
 
+        # Assign the orders to rider but in order of arrival
+        state.rider.items.clear()
         for visit in visits:
             order = order_map.get(visit["job"])
             if order:
                 order.arrival = datetime.fromisoformat(
                     visit["arrival"].replace("Z", "+00:00")
                 )
-                visit["customerName"] = order.customer_name
-                visit["deliveryAddress"] = order.delivery_address
-                visit["status"] = order.status
-                visit["timeWindow"] = order.get_time_window()
-
-        state.rider.visits = visits
-        state.visit_map = {visit["job"]: visit for visit in state.rider.visits}
+                state.rider.items.append(order)
 
     except requests.exceptions.RequestException as e:
         print(f"Request error: {e}")

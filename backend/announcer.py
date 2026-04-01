@@ -1,5 +1,5 @@
-import queue
 import json
+import queue
 
 from flask import Response
 
@@ -33,12 +33,7 @@ def update_order_status(order_id, status, label):
     if not order:
         return {"error": "Order not found"}, 404
 
-    visit = state.visit_map.get(order_id)
-    if not visit:
-        return {"error": "Rider visit not found"}, 404
-
     order.status = status
-    visit["status"] = status
 
     msg = {order_id: label}
     announce_order.announce(json.dumps(msg))

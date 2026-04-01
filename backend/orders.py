@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 import state
 
@@ -95,8 +95,16 @@ class Orders:
     def __init__(self):
         self.items: list[Order] = []
 
-    def add_many(self, orders: List[Order]):
-        self.items.extend(orders)
+    def to_list(self) -> list[dict]:
+        return [order.to_dict() for order in self.items]
+
+
+class Rider:
+    def __init__(self, name: str, shifts: list[dict], capacity: list[int]):
+        self.name = name
+        self.shifts = shifts
+        self.capacity = capacity
+        self.items: list[Order] = []
 
     def to_list(self) -> list[dict]:
         return [order.to_dict() for order in self.items]
