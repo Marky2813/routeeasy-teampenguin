@@ -1,6 +1,6 @@
 # RouteEasy 🛵
 
-> **Last-mile delivery, finally fixed — for the riders who make it happen.**
+> **Last-mile delivery, finally fixed.**
 
 [![GitHub](https://img.shields.io/badge/GitHub-routeeasy--teampenguin-181717?logo=github)](https://github.com/Marky2813/routeeasy-teampenguin)
 [![Made with Flask](https://img.shields.io/badge/Backend-Flask-000000?logo=flask)](https://flask.palletsprojects.com/)
@@ -67,7 +67,7 @@ The immediate target market is the thousands of local logistics operators in Ind
 ## Demo
 
 <!-- Replace the link below once the product video URL is available -->
-> 📹 **Product Video:** *[Embed or link video here once available]*
+> 📹 **Product Video:** *[![Watch Demo](assets/dashboard_with_play.png)](https://youtu.be/ab0htP9xb6E)*
 
 **Screenshots:**
 
