@@ -797,16 +797,16 @@ function Rider() {
   const setVisits = useRid((state) => state.updateVisits)
   const [currentIndex, setCurrentIndex] = useState(() => Number(localStorage.getItem("index")) || 0);
   const currentIndexRef = useRef(currentIndex);
-  useEffect(() => {
-    addEventListener("beforeunload", setIndex)
-    function setIndex() {
-      window.localStorage.setItem("index", currentIndexRef.current);
-    }
-    return () => {
-      window.removeEventListener("beforeunload", setIndex);
-      setIndex();
-    }
-  }, [])
+  // useEffect(() => {
+  //   addEventListener("beforeunload", setIndex)
+  //   function setIndex() {
+  //     window.localStorage.setItem("index", currentIndexRef.current);
+  //   }
+  //   return () => {
+  //     window.removeEventListener("beforeunload", setIndex);
+  //     setIndex();
+  //   }
+  // }, [])
 
   useEffect(() => {
     // make the call to the backend and get data. if data .length is greater than zero, means that the orders have been allocated, else not
@@ -814,9 +814,9 @@ function Rider() {
       try {
         const res = await axios.get('http://localhost:5000/api/rider');
         const data = res.data;
-        if (data?.visits?.length > 0) {
-          setAllocated(true);
-          setVisits(data.visits);
+        console.log(data)
+        if (data?.length > 0) {
+          setVisits(data);
         }
       } catch (err) {
         console.error("Could not get rider order data", err)
@@ -829,10 +829,15 @@ function Rider() {
 
 
   const currentStop = visits[currentIndex];
-  const remainingStops = visits.filter((ele, index) => (currentStop.job !== ele.job) && (ele.status === "pending" || (ele.status === "cancelled" && index > currentIndex))).map((ele) => ({
+  const remainingStops = visits.filter((ele, index) => (currentStop.orderId !== ele.orderId) && (ele.status === "pending" || (ele.status === "cancelled" && index > currentIndex))).map((ele) => ({
     ...ele, deliveryAddress: ele.deliveryAddress.split(",").slice(1).join(",")
   }));
 
+  useEffect(() => {
+    if(remainingStops.length > 0){
+      setAllocated(true);
+    }
+  }, [visits])
 
   //formatting the delivery addresses 
   // for(let i = 0; i < remainingStops.length; i++) {
@@ -916,8 +921,8 @@ function Rider() {
             <h3 className="text-sm pl-2 font-thin pb-2">Window: {currentStop.timeWindow}</h3>
             <div className="flex flex-col p-2 gap-1">
               <Button type='button' onClick={clickFn} className='dark'>Navigate to stop</Button>
-              <Button type='button' className='dark' onClick={() => orderFailed(currentStop.job)}>Mark as failed</Button>
-              <Button type='button' className='dark' onClick={() => orderDelivered(currentStop.job)}>Mark as delivered</Button>
+              <Button type='button' className='dark' onClick={() => orderFailed(currentStop.orderId)}>Mark as failed</Button>
+              <Button type='button' className='dark' onClick={() => orderDelivered(currentStop.orderId)}>Mark as delivered</Button>
             </div>
           </>
         )

@@ -19,7 +19,7 @@ function SSEListener() {
         order.orderId == jobId ? { ...order, status: newStatus[jobId] } : order
       ));
       setVisits(latestRiderData.map(order =>
-        order.job === jobId ? { ...order, status: newStatus[jobId] } : order
+        order.orderId === jobId ? { ...order, status: newStatus[jobId] } : order
       ));
     };
 
