@@ -56,15 +56,6 @@ def rider_provider():
     return jsonify(state.rider.to_list()), 200
 
 
-@api.get("/test_route")
-def test_route():
-    ok = solve_vrp()
-    if not ok:
-        return {"message": "mayday"}, 401
-    else:
-        return jsonify(state.orders.to_list()), 200
-
-
 @api.get("/notification/flip/<order_id>")
 def flip_notification(order_id):
     for order in state.orders.items:
