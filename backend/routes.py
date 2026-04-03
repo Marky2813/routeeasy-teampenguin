@@ -5,16 +5,19 @@ from datetime import timedelta
 
 import requests
 from dotenv import load_dotenv
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response, stream_with_context
 
 import state
 from orders import Order, OrderStatus
 from vrp_api import solve_vrp
+from auth import require_api_key
+from announcer import announce_order, update_order_status
+from concurrent.futures import ThreadPoolExecutor
 
 api = Blueprint("api", __name__)
 
 load_dotenv()
-TMB_API_KEY = os.getenv("TMB_API_KEY")
+TMB_API_KEY = os.environ.get("TMB_API_KEY")
 
 
 @api.get("/health")
@@ -23,13 +26,15 @@ def health_check():
 
 
 @api.get("/orders/list")
+@require_api_key
 def get_orders():
     return jsonify({"Orders": state.orders.to_list()})
 
 
 @api.post("/orders")
+@require_api_key
 def retrieve_post():
-    orders = request.get_json()
+    orders = request.get_json()["data"]
 
     if not orders:
         return jsonify({"error": "Missing or invalid JSON payload"}), 400
@@ -52,11 +57,23 @@ def retrieve_post():
 
 
 @api.get("/rider")
+@require_api_key
 def rider_provider():
     return jsonify(state.rider.to_list()), 200
 
 
+@api.get("/test_route")
+@require_api_key
+def test_route():
+    ok = solve_vrp()
+    if not ok:
+        return {"message": "mayday"}, 401
+    else:
+        return jsonify(state.orders.to_list()), 200
+
+
 @api.get("/notification/flip/<order_id>")
+@require_api_key
 def flip_notification(order_id):
     for order in state.orders.items:
         if order.order_id == order_id:
@@ -68,6 +85,7 @@ def flip_notification(order_id):
 
 
 @api.get("/solution")
+@require_api_key
 def get_solution():
     if state.last_order_solvice_id is None:
         return {"message": "mayday"}, 401
@@ -84,6 +102,7 @@ def get_solution():
 
 
 @api.post("/webhook")
+@require_api_key
 def whatsapp_webhook():
     data = request.get_json()
     recipient = data.get("from")  # gives like 91XXXXXXXXXX
@@ -94,9 +113,11 @@ def whatsapp_webhook():
         return {"message": "Message Ignored."}
 
     if "reschedule" in data.get("message").lower():
-        requests.get(
-            url=f"http://127.0.0.1:{state.port}/api/order/cancel/{order.order_id}"
-        )
+        # requests.get(
+        #     url=f"http://127.0.0.1:{state.port}/api/order/cancel/{order.order_id}"
+        # )
+        # my dumass was making internal http call instead of import the function and running it directly.
+        cancel_order(order_id=order.order_id)
         # GET req. to: https://api.textmebot.com/send.php?recipient=[+91xxxxxxxxxx]&apikey=[TMB_API_KEY]&text=[TEXT]
         text = f"✅ Your request to reschedule the delivery for order ID {order.order_id} has been received and forwarded to the delivery team. \n\nPlease note: if this request is made less than 2 hours before the expected arrival time, the driver may still attempt delivery. \n\nThank you for your understanding."
 
@@ -121,6 +142,9 @@ def whatsapp_webhook():
 
 @api.get("notification/send")
 def send_mssg():
+    key = request.headers.get("X-API-Key") or request.args.get("api_key")
+    if key != os.environ.get("ADMIN_API_KEY"):
+        return jsonify({"error": "Unauthorized"}), 401
     result = []
     for order in state.orders.items:
         if order.status != OrderStatus.PENDING or order.notification_status:
@@ -137,7 +161,7 @@ def send_mssg():
 
 
 def send_message(order):
-    tmb_api_key = os.getenv("TMB_API_KEY")
+    tmb_api_key = os.environ.get("TMB_API_KEY")
     if not tmb_api_key:
         return jsonify({"error": "TextMeBot API key not found"}), 500
 
@@ -173,3 +197,70 @@ def check_order_details(
                 continue  # receiver might have multiple orders, so can't simply return None on their first order, simply return all the orders with pending status? or just the first order for now.
             return order
         # We can check the current time and the arrival time also. And send message according to that to the customer.
+
+
+@api.post("/geocode")
+@require_api_key
+def geocode_orders():
+    orders = request.json  # the whole array
+
+    def geocode_one(order):
+        address = order["deliveryAddress"].replace(" ", "+") + f",{order['pincode']}"
+        res = requests.get(
+            "https://maps.googleapis.com/maps/api/geocode/json",
+            params={
+                "address": address,
+                "key": os.environ.get("GOOGLE_API_KEY"),
+            },
+        )
+        location = res.json()["results"][0]["geometry"]["location"]
+        order["coordinates"] = [location["lat"], location["lng"]]
+        print(res)
+        return order
+
+    with ThreadPoolExecutor() as executor:
+        geocoded = list(executor.map(geocode_one, orders))
+
+    return jsonify(geocoded)
+
+
+# announcer routes
+@api.get("/order/cancel/<order_id>")
+@require_api_key
+def cancel_order(order_id):
+    return update_order_status(order_id, OrderStatus.CANCELLED, "cancelled")
+
+
+@api.get("/order/complete/<order_id>")
+@require_api_key
+def successful_order(order_id):
+    return update_order_status(order_id, OrderStatus.COMPLETED, "completed")
+
+
+@api.get("/order/fail/<order_id>")
+@require_api_key
+def failed_order(order_id):
+    return update_order_status(order_id, OrderStatus.FAILED, "failed")
+
+
+@api.get("/order/get/status")
+# TODO: do we need to require api key for this endpoint too? NO, each thread cannot access this somehow? givign error
+def get_cancelled_order():
+    key = request.headers.get("X-API-Key") or request.args.get("api_key")
+    if key != os.environ.get("ADMIN_API_KEY"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    def event_stream():
+        messages = announce_order.listen()
+        while True:
+            msg = messages.get()
+            yield f"data: {msg}\n\n"
+
+    return Response(
+        stream_with_context(event_stream()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )

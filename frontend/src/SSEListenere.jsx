@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { useZus } from './store'
 import { useRid } from './riderstore'
+import client from "./lib/api";
 
 function SSEListener() {
   const setData = useZus((state) => state.updateOrders);
   const setVisits = useRid((state) => state.updateVisits)
   useEffect(() => {
-    const es = new EventSource("http://localhost:5000/api/order/get/status");
+    const es = new EventSource(`${client.defaults.baseURL}/api/order/get/status?api_key=${client.defaults.headers['X-API-Key']}`);
     es.onmessage = (e) => {
       const latestData = useZus.getState().ordersData;
       const latestRiderData = useRid.getState().visits;

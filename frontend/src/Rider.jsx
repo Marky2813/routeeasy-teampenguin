@@ -3,6 +3,7 @@ import { Button } from "./components/ui/button";
 import axios from 'axios';
 import { Separator } from "@/components/ui/separator";
 import { useRid } from './riderstore'
+import client from "./lib/api";
 //   "name": "rider-1",
 //   "visits": [
 //     {
@@ -812,7 +813,7 @@ function Rider() {
     // make the call to the backend and get data. if data .length is greater than zero, means that the orders have been allocated, else not
     const fetchRiderData = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/rider');
+        const res = await client.get('/api/rider');
         const data = res.data;
         console.log(data)
         if (data?.length > 0) {
@@ -857,7 +858,7 @@ function Rider() {
   async function orderFailed(job) {
     //this function needs to set the status as failed, then take the id and send it to the backend and shift the next to the next one
     try {
-    await axios.get(`http://localhost:5000/api/order/fail/${job}`)
+    await client.get(`/api/order/fail/${job}`)
     currentStop.status = "failed";
     currentIndexRef.current = ++currentIndexRef.current;
     if(currentIndexRef.current === visits.length) {
@@ -877,7 +878,7 @@ function Rider() {
 
   async function orderDelivered(job) {
     try {
-    await axios.get(`http://localhost:5000/api/order/complete/${job}`)
+    await client.get(`/api/order/complete/${job}`)
     currentStop.status = "success";
     currentIndexRef.current = ++currentIndexRef.current;
     if(currentIndexRef.current === visits.length) {

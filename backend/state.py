@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from orders import Order, Orders, Rider
 
 load_dotenv()
-port = int(os.getenv("PORT", 5000))
-solvice_api_key = os.getenv("SOLVICE_API_KEY")
+port = int(os.environ.get("PORT", 5000))
+solvice_api_key = os.environ.get("SOLVICE_API_KEY")
 if solvice_api_key is None:
     print("ERROR: missing SOLVICE_API_KEY")
     sys.exit()
