@@ -851,7 +851,8 @@ function Rider() {
   //current stop revers to the object which refers to the data being delivered now.  
 
   function clickFn() {
-    console.log(remainingStops)
+    console.log(visits[currentIndex].coordinates[0], visits[currentIndex].coordinates[0]);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${visits[currentIndex].coordinates[0]},${visits[currentIndex].coordinates[1]}`, "_blank");
   }
 
   async function orderFailed(job) {
@@ -898,7 +899,7 @@ function Rider() {
       <div className="mt-3 ml-2">
         {allocated ? (
           <>
-            <p className="text-sm font-semibold">RouteEasy • Ravi Bhadhur</p>
+            <p className="text-sm font-semibold">RouteEasy • Raju Bhadhur</p>
             <h1 className="text-lg font-bold">{remainingStops.length + 1} Stops Today</h1>
             <p className="text-sm font-semibold">Optimised route • 50km total</p>
           </>
@@ -906,7 +907,7 @@ function Rider() {
           :
           (
             <>
-              <p className="text-sm font-semibold">RouteEasy • Ravi Bhadhur</p>
+              <p className="text-sm font-semibold">RouteEasy • Raju Bhadhur</p>
               <h1 className="text-lg font-bold">No orders alloted</h1>
               <p className="text-sm font-semibold">Optimised route • -</p>
             </>

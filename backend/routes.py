@@ -129,6 +129,7 @@ def send_mssg():
         # result["order_id"] = order.order_id
         order.notification_status = 1
         time.sleep(6)
+        break
     return {
         "message": f"Notifications sent to all pending orders with notification consent. Count: {len(result)}"
     }
@@ -142,7 +143,7 @@ def send_message(order):
         return jsonify({"error": "TextMeBot API key not found"}), 500
 
     try:
-        message_body = f"Hi {order.customer_name} 👋 \n\nYour delivery is scheduled between: ⏰ {(order.arrival - timedelta(minutes=83)).strftime('%H:%M')} - {(order.arrival + timedelta(minutes=37)).strftime('%H:%M')}\n\nReply: \nCONFIRM ✅ \nRESCHEDULE 🔁 \nOrder ID: {order.order_id}"
+        message_body = f"Hi {order.customer_name} 👋\n\nYour delivery is scheduled between:\n⏰ {order.get_time_window()}\nPlease reply with:\n1️⃣ Confirm \n2️⃣ Reschedule\n\nOrder ID: {order.order_id}"
 
         response = requests.get(
             url="https://api.textmebot.com/send.php",
