@@ -7,7 +7,7 @@ function SSEListener() {
   const setData = useZus((state) => state.updateOrders);
   const setVisits = useRid((state) => state.updateVisits)
   useEffect(() => {
-    const es = new EventSource(`${client.defaults.baseURL}/api/order/get/status?api_key=${client.defaults.headers['X-API-Key']}`);
+    const es = new EventSource(`${client.defaults.baseURL}/api/order/get/status`);
     es.onmessage = (e) => {
       const latestData = useZus.getState().ordersData;
       const latestRiderData = useRid.getState().visits;

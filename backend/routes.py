@@ -10,12 +10,10 @@ from flask import Blueprint, jsonify, request, Response, stream_with_context
 import state
 from orders import Order, OrderStatus
 from vrp_api import solve_vrp
-from auth import require_api_key
 from announcer import announce_order, update_order_status
 from concurrent.futures import ThreadPoolExecutor
 
 api = Blueprint("api", __name__)
-
 load_dotenv()
 TMB_API_KEY = os.environ.get("TMB_API_KEY")
 
@@ -26,13 +24,11 @@ def health_check():
 
 
 @api.get("/orders/list")
-@require_api_key
 def get_orders():
     return jsonify({"Orders": state.orders.to_list()})
 
 
 @api.post("/orders")
-@require_api_key
 def retrieve_post():
     orders = request.get_json()["data"]
 
@@ -57,13 +53,11 @@ def retrieve_post():
 
 
 @api.get("/rider")
-@require_api_key
 def rider_provider():
     return jsonify(state.rider.to_list()), 200
 
 
 @api.get("/test_route")
-@require_api_key
 def test_route():
     ok = solve_vrp()
     if not ok:
@@ -73,7 +67,6 @@ def test_route():
 
 
 @api.get("/notification/flip/<order_id>")
-@require_api_key
 def flip_notification(order_id):
     for order in state.orders.items:
         if order.order_id == order_id:
@@ -85,7 +78,6 @@ def flip_notification(order_id):
 
 
 @api.get("/solution")
-@require_api_key
 def get_solution():
     if state.last_order_solvice_id is None:
         return {"message": "mayday"}, 401
@@ -102,7 +94,6 @@ def get_solution():
 
 
 @api.post("/webhook")
-@require_api_key
 def whatsapp_webhook():
     data = request.get_json()
     recipient = data.get("from")  # gives like 91XXXXXXXXXX
@@ -142,9 +133,6 @@ def whatsapp_webhook():
 
 @api.get("notification/send")
 def send_mssg():
-    key = request.headers.get("X-API-Key") or request.args.get("api_key")
-    if key != os.environ.get("ADMIN_API_KEY"):
-        return jsonify({"error": "Unauthorized"}), 401
     result = []
     for order in state.orders.items:
         if order.status != OrderStatus.PENDING or order.notification_status:
@@ -200,7 +188,6 @@ def check_order_details(
 
 
 @api.post("/geocode")
-@require_api_key
 def geocode_orders():
     orders = request.json  # the whole array
 
@@ -226,19 +213,16 @@ def geocode_orders():
 
 # announcer routes
 @api.get("/order/cancel/<order_id>")
-@require_api_key
 def cancel_order(order_id):
     return update_order_status(order_id, OrderStatus.CANCELLED, "cancelled")
 
 
 @api.get("/order/complete/<order_id>")
-@require_api_key
 def successful_order(order_id):
     return update_order_status(order_id, OrderStatus.COMPLETED, "completed")
 
 
 @api.get("/order/fail/<order_id>")
-@require_api_key
 def failed_order(order_id):
     return update_order_status(order_id, OrderStatus.FAILED, "failed")
 
@@ -246,9 +230,6 @@ def failed_order(order_id):
 @api.get("/order/get/status")
 # TODO: do we need to require api key for this endpoint too? NO, each thread cannot access this somehow? givign error
 def get_cancelled_order():
-    key = request.headers.get("X-API-Key") or request.args.get("api_key")
-    if key != os.environ.get("ADMIN_API_KEY"):
-        return jsonify({"error": "Unauthorized"}), 401
 
     def event_stream():
         messages = announce_order.listen()
