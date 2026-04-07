@@ -55,9 +55,7 @@ jobs:
             --max-instances=3 \
             --set-secrets="SOLVICE_API_KEY=solvice-api-key:latest,\
             GOOGLE_GEOCODING_API_KEY=google-geocoding-key:latest,\
-            TMB_API_KEY=tmb-api-key:latest,\
-            ADMIN_API_KEY=admin-api-key:latest,\
-            WEBHOOK_SECRET=webhook-secret:latest" \
+            TMB_API_KEY=tmb-api-key:latest" \
             --quiet
 
       - name: Get backend URL
