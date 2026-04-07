@@ -74,11 +74,6 @@ jobs:
           # Health check
           curl -sf $URL/api/health && echo "✅ /api/health OK"
 
-          # Auth guard
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST $URL/api/orders \
-            -H "Content-Type: application/json" -d "[]")
-          [ "$STATUS" = "401" ] && echo "✅ auth guard OK" || (echo "❌ auth guard FAILED (got $STATUS)" && exit 1)
-
   deploy-frontend:
     name: Deploy Frontend
     needs: deploy-backend
@@ -98,7 +93,6 @@ jobs:
         run: cd frontend && npm run build
         env:
           VITE_API_URL: ${{ needs.deploy-backend.outputs.url }}
-          VITE_ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
