@@ -16,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 api = Blueprint("api", __name__)
 load_dotenv()
 TMB_API_KEY = os.environ.get("TMB_API_KEY")
+GOOGLE_GEOCODING_API_KEY = os.environ.get("GOOGLE_GEOCODING_API_KEY")
 
 
 @api.get("/health")
@@ -131,19 +132,20 @@ def whatsapp_webhook():
     return {"message": "Message sent."}
 
 
-@api.get("notification/send")
 def send_mssg():
     result = []
     for order in state.orders.items:
         if order.status != OrderStatus.PENDING or order.notification_status:
+            print("skipping for" + order.customer_name)
             continue
         result.append(send_message(order))
+        print(result)
         # result["order_id"] = order.order_id
         order.notification_status = 1
         time.sleep(6)
-    return {
-        "message": f"Notifications sent to all pending orders with notification consent. Count: {len(result)}"
-    }
+    print(
+        f"message: Notifications sent to all pending orders with notification consent. Count: {len(result)}. Details: {result}"
+    )
 
     # return {"message": f"{count} messages sent.", "details": result}
 
@@ -197,12 +199,11 @@ def geocode_orders():
             "https://maps.googleapis.com/maps/api/geocode/json",
             params={
                 "address": address,
-                "key": os.environ.get("GOOGLE_API_KEY"),
+                "key": GOOGLE_GEOCODING_API_KEY,
             },
         )
         location = res.json()["results"][0]["geometry"]["location"]
         order["coordinates"] = [location["lat"], location["lng"]]
-        print(res)
         return order
 
     with ThreadPoolExecutor() as executor:
