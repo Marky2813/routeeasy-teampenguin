@@ -21,7 +21,7 @@ import axios from "axios"
 import  {EventSource } from "eventsource";
 import { useZus } from './store'
 import { Spinner } from "@/components/ui/spinner"
-
+import client from '@/lib/api'
 
 
 const dummyData = [
@@ -538,14 +538,17 @@ function App() {
             const workbook = XLSX.read(e.target.result, { type: "array" });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const res = XLSX.utils.sheet_to_json(firstSheet);
-            const geocoded = await Promise.all(res.map(async (e) => {
-              let address = e.deliveryAddress.split(" ").join("+") + `,${e.pincode}`;
-              const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`);
-              const coordinates = [response.data.results[0].geometry.location.lat, response.data.results[0].geometry.location.lng];
-              e.coordinates = coordinates;  
-              return e;
-            }));
-            const optimized = await axios.post('http://localhost:5000/api/orders', geocoded);
+            // const geocoded = await Promise.all(res.map(async (e) => {
+            //   let address = e.deliveryAddress.split(" ").join("+") + `,${e.pincode}`;
+            //   const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`);
+            //   const coordinates = [response.data.results[0].geometry.location.lat, response.data.results[0].geometry.location.lng];
+            //   e.coordinates = coordinates;  
+            //   return e;
+            // }));
+            const geocoded = await client.post("/api/geocode", res);
+            // const optimized = await axios.post('http://localhost:5000/api/orders', geocoded);
+            console.log("sending to /api/orders:", JSON.stringify(geocoded, null, 2));
+            const optimized = await client.post('/api/orders', geocoded);
             console.log(optimized.data);
             setData(optimized.data);
             setOptimizing(false);

@@ -1,0 +1,110 @@
+name: Deploy RouteEasy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGION: us-central1
+  IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/routeeasy/backend
+
+jobs:
+  test:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: cd backend && pip install -r requirements.txt pytest
+      - run: cd backend && pytest tests/ -v
+
+  deploy-backend:
+    name: Deploy Backend
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.get-url.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build and push image
+        run: |
+          docker build -t ${{ env.IMAGE }}:${{ github.sha }} ./backend
+          docker push ${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy routeeasy-backend \
+            --image=${{ env.IMAGE }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=8080 \
+            --timeout=3600 \
+            --min-instances=1 \
+            --max-instances=3 \
+            --set-secrets="SOLVICE_API_KEY=solvice-api-key:latest,\
+            GOOGLE_GEOCODING_API_KEY=google-geocoding-key:latest,\
+            TMB_API_KEY=tmb-api-key:latest,\
+            ADMIN_API_KEY=admin-api-key:latest,\
+            WEBHOOK_SECRET=webhook-secret:latest" \
+            --quiet
+
+      - name: Get backend URL
+        id: get-url
+        run: |
+          URL=$(gcloud run services describe routeeasy-backend \
+            --region=${{ env.REGION }} --format='value(status.url)')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Smoke tests
+        run: |
+          URL=${{ steps.get-url.outputs.url }}
+
+          # Health check
+          curl -sf $URL/api/health && echo "✅ /api/health OK"
+
+          # Auth guard
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST $URL/api/orders \
+            -H "Content-Type: application/json" -d "[]")
+          [ "$STATUS" = "401" ] && echo "✅ auth guard OK" || (echo "❌ auth guard FAILED (got $STATUS)" && exit 1)
+
+  deploy-frontend:
+    name: Deploy Frontend
+    needs: deploy-backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: cd frontend && npm ci
+
+      - name: Build
+        run: cd frontend && npm run build
+        env:
+          VITE_API_URL: ${{ needs.deploy-backend.outputs.url }}
+          VITE_ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.GCP_PROJECT_ID }}
+          channelId: live
+          entryPoint: frontend

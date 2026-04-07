@@ -9,6 +9,7 @@ from routes import api
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     app.register_blueprint(api, url_prefix="/api")
 
     @app.get("/")
@@ -29,8 +30,7 @@ def create_app():
 
 
 app = create_app()
-CORS(app)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=state.port, debug=True)
+    app.run(host="0.0.0.0", port=state.port, debug=False)
