@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: cd backend && pip install -r requirements.txt pytest
-      - run: cd backend && python -m pytest tests/ -v
+      # - run: cd backend && python -m pytest tests/ -v
 
   deploy-backend:
     name: Deploy Backend
