@@ -1,4 +1,4 @@
-# RouteEasy 🛵
+# RouteEasy 
 
 > **Last-mile delivery, finally fixed.**
 
